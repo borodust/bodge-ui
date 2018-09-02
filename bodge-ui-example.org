@@ -1,0 +1,269 @@
+#+PROPERTY: header-args :mkdirp yes
+#+PROPERTY: header-args:lisp :results "output silent"
+#+PROPERTY: header-args:glsl :results "none"
+* Example
+
+Example =bodge-ui= application that shows how to setup UI and required renderer context using
+=bodge-host= routines.
+
+
+** Preparations
+
+Lets load all required systems for our example to work
+
+#+BEGIN_SRC lisp :eval yes
+  (ql:quickload '(bodge-host bodge-ui bodge-ui/renderer))
+#+END_SRC
+
+Also let define a package we will evaluate our code blocks
+
+#+BEGIN_SRC lisp :tangle example/packages.lisp
+  (cl:defpackage :bodge-ui.example
+    (:use :cl :bodge-ui :bodge-ui.renderer))
+#+END_SRC
+
+
+** Window
+
+=bodge-ui= is an immediate mode GUI, meaning you need to gather input and render it yourself in
+some sort of a loop. =bodge-host= will help us with setting up all required bits to start
+displaying =bodge-ui= interfaces.
+
+
+#+BEGIN_SRC lisp :tangle example/app.lisp
+  (cl:in-package :bodge-ui.example)
+
+  (defvar *window-width* 800)
+  (defvar *window-height* 600)
+
+  ;; Main class of our application
+  (defclass bodge-ui-app (bodge-host:application)
+    ;; UI context
+    ((context :initform nil)
+     ;; Renderer context
+     (renderer :initform nil)
+     ;; and some state we need later
+     (enabled-p :initform t)
+     (mouse-actions :initform (list))
+     (cursor :initform (bodge-math:vec2)))
+    (:default-initargs
+     ;; For the example we use OpenGL 3.3.
+     ;; That's what default renderer requires.
+     :opengl-version '(3 3)
+     :viewport-title "Bodge UI Example"
+     :viewport-width *window-width*
+     :viewport-height *window-height*))
+#+END_SRC
+
+We would need a bit of information about user input later, so lets keep it in our application
+instance for now. For this example, we would track only mouse input: buttons and a cursor
+position.
+
+#+BEGIN_SRC lisp :tangle example/app.lisp
+  (cl:in-package :bodge-ui.example)
+
+  (defmethod bodge-host:on-mouse-action ((this bodge-ui-app) button action)
+    (with-slots (mouse-actions) this
+      (alexandria:nconcf mouse-actions (list (cons button action)))))
+
+
+  (defmethod bodge-host:on-cursor-movement ((this bodge-ui-app) x y)
+    (with-slots (cursor) this
+      (setf (bodge-math:x cursor) x
+            (bodge-math:y cursor) y)))
+#+END_SRC
+
+
+** Rendering
+We need a valid rendering context to bring UI onto the screen: =#'setup-rendering-context= bind
+it to whatever thread we will decide to.
+#+BEGIN_SRC lisp :tangle example/app.lisp
+  (cl:in-package :bodge-ui.example)
+
+  (defun setup-rendering-context (application)
+    ;; This will bind GL context of a window to the thread of our choice.
+    (bodge-host:bind-main-rendering-context application)
+    ;; Following small titbit is required to run our renderer
+    (glad:init))
+#+END_SRC
+
+
+Once valid rendering context is bound, we can create our UI renderer provided with
+=bodge-ui/renderer= system. Our =bodge-ui-app= application will also be a source of input events
+to our UI.
+#+BEGIN_SRC lisp :tangle example/app.lisp
+  (cl:in-package :bodge-ui.example)
+
+  (defun initialize-ui (application)
+    (with-slots (context renderer) application
+      (setf renderer (make-nuklear-renderer *window-width* *window-height*)
+            context (make-ui renderer :input-source application))
+      (add-window 'demo-window :ui context)))
+
+  ;; Well, we also need to cleanup after ourselves
+  (defun release-ui (application)
+    (with-slots (context renderer) application
+      (destroy-ui context)
+      (destroy-nuklear-renderer renderer)))
+#+END_SRC
+
+Every frame we need to rerender and recompose our UI - very useful property of immediate mode
+user interfaces: very handy for in-game menus.
+#+BEGIN_SRC lisp :tangle example/app.lisp
+  (cl:in-package :bodge-ui.example)
+
+  (defun render-example-ui (app)
+    (with-slots (context) app
+      ;; Clear our background with direct OpenGL commands
+      (gl:clear-color 0.8 0.8 0.8 1.0)
+      (gl:clear :color-buffer-bit)
+      ;; Compose and render the UI
+      (compose-ui context)
+      ;; Bring rendered buffer to the front
+      (bodge-host:swap-buffers app)))
+#+END_SRC
+
+At last, our rendering loop, although very simple one: renders our UI every iteration until
+we stop it by settting =enabled-p= to =nil=.
+#+BEGIN_SRC lisp :tangle example/app.lisp
+  (cl:in-package :bodge-ui.example)
+
+  (defun run-rendering-loop (application)
+    (with-slots (enabled-p) application
+      (loop while enabled-p
+            do (render-example-ui application))))
+#+END_SRC
+
+Now, when all required functions are implemented, we are ready to setup a rendering thread using
+them.
+#+BEGIN_SRC lisp :tangle example/app.lisp
+  (cl:in-package :bodge-ui.example)
+
+  (defun start-rendering-thread (application)
+    (with-slots (context renderer enabled-p) application
+      ;; Start thread which we will use for rendering
+      (bodge-concurrency:in-new-thread ("rendering-thread")
+        (unwind-protect
+             (progn
+               ;; Setup rendering context
+               (setup-rendering-context application)
+               ;; Initialize renderer and UI context
+               (initialize-ui application)
+               ;; Loop while we can!
+               (run-rendering-loop application)
+               ;; Release resources after leaving the loop
+               (release-ui application))
+          ;; Be sure to shutdown whole application before exiting the thread
+          (bodge-host:stop-application application)))))
+#+END_SRC
+
+** Lifecycle
+
+We need to start our rendering thread somewhere. Lets setup a couple callbacks for that,
+starting rendering thread after application initialization and stopping render loop on
+application hiding event (fired after closing a window). We also need to make sure we are
+stopping loop in =on-destroy= callback when programmatically closing our application.
+
+#+BEGIN_SRC lisp :tangle example/app.lisp
+  (cl:in-package :bodge-ui.example)
+
+  (defmethod bodge-host:on-init ((this bodge-ui-app))
+    (with-slots (context renderer enabled-p) this
+      (setf enabled-p t)
+      (start-rendering-thread this)))
+
+  (defmethod bodge-host:on-hide ((this bodge-ui-app))
+    (with-slots (enabled-p) this
+      (setf enabled-p nil)))
+
+  (defmethod bodge-host:on-destroy ((this bodge-ui-app))
+    (with-slots (enabled-p) this
+      (setf enabled-p nil)))
+#+END_SRC
+
+
+** UI
+
+Finally! We've done everything required to put our UI onto screen.
+
+You might be confused a bit as to why this requires so much work comparing to /conventional/ UI
+frameworks like =Qt= or =GTK=. Traditional UI frameworks won't allow you to take over their
+rendering loop or input management, while IM UI is designed with this goal in mind. This is
+super handy for games - you can render whenever you want or however you want: into texture, into
+default framebuffer, into void. You are also fully in control of user input: you can emulate it,
+attach or detach from/to any source any time.
+
+But, lets get back to task at hand. Here's our first window descriptor:
+
+#+BEGIN_SRC lisp :tangle example/ui.lisp
+  (cl:in-package :bodge-ui.example)
+
+  (defwindow (demo-window
+              (:title "Hello Bodge UI")
+              (:origin 200 50)
+              (:width 400) (:height 400)
+              (:options :movable :resizable
+                        :minimizable :scrollable
+                        :closable))
+    (label :text "Nested:")
+    (horizontal-layout
+     (radio-group
+      (radio :label "Option 1")
+      (radio :label "Option 2" :activated t))
+     (vertical-layout
+      (check-box :label "Check 1" :width 100)
+      (check-box :label "Check 2"))
+     (vertical-layout
+      (label :text "Awesomely" :align :left)
+      (label :text "Stacked" :align :middle)
+      (label :text "Labels" :align :right)))
+    (label :text "Expand by width:")
+    (horizontal-layout
+     (button :label "Dynamic")
+     (button :label "Min-Width" :width 80)
+     (button :label "Fixed-Width" :expandable nil :width 100))
+    (label :text "Expand by ratio:")
+    (horizontal-layout
+     (button :label "1.0" :expand-ratio 1.0)
+     (button :label "0.75" :expand-ratio 0.75)
+     (button :label "0.5" :expand-ratio 0.5))
+    (label :text "Rest:")
+    (button :label "Top-Level Button"))
+#+END_SRC
+
+As mentioned earlier, our application instance is also an input source for UI: lets implement
+methods that would feed input data into the UI.
+
+#+BEGIN_SRC lisp :tangle example/ui.lisp
+  (cl:in-package :bodge-ui.example)
+
+  (defmethod next-mouse-interaction ((this bodge-ui-app))
+    (with-slots (mouse-actions) this
+      (let ((interaction (pop mouse-actions)))
+        (values (car interaction) (cdr interaction)))))
+
+  (defmethod last-cursor-position ((this bodge-ui-app) &optional result-vec2)
+    (with-slots (cursor) this
+      (if result-vec2
+          (progn
+            (setf (bodge-math:x result-vec2) (bodge-math:x cursor)
+                  (bodge-math:y result-vec2) (bodge-math:y cursor))
+            result-vec2)
+          cursor)))
+#+END_SRC
+
+Here we define and export a method to run our example.
+#+BEGIN_SRC lisp :tangle example/app.lisp
+  (cl:in-package :bodge-ui.example)
+
+  (export 'run)
+  (defun run ()
+    (bodge-host:start-application (make-instance 'bodge-ui-app)))
+#+END_SRC
+
+Lets run it!
+#+BEGIN_SRC lisp :eval on
+  (cl:in-package :bodge-ui.example)
+
+  (run)
+#+END_SRC

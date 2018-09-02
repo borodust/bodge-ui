@@ -57,4 +57,6 @@
   :depends-on (bodge-host bodge-ui bodge-ui/renderer)
   :pathname "example/"
   :serial t
-  :components ((:file "example")))
+  :components ((:file "packages")
+               (:file "app")
+               (:file "ui")))

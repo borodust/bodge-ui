@@ -64,7 +64,6 @@
 
 (defun destroy-ui (nuklear-context)
   (with-slots (handle nuklear-font) nuklear-context
-    (destroy-nuklear-font nuklear-font)
     (nuklear:destroy-context handle)))
 
 
