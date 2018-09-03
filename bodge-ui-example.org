@@ -3,19 +3,19 @@
 #+PROPERTY: header-args:glsl :results "none"
 * Example
 
-Example =bodge-ui= application that shows how to setup UI and required renderer context using
+Example =bodge-ui= application that shows how to setup UI and required rendering context using
 =bodge-host= routines.
 
 
 ** Preparations
 
-Lets load all required systems for our example to work
+Lets load all required systems for our example to work.
 
 #+BEGIN_SRC lisp :eval yes
   (ql:quickload '(bodge-host bodge-ui bodge-ui/renderer))
 #+END_SRC
 
-Also let define a package we will evaluate our code blocks
+Also lets define a package we will evaluate our code blocks in.
 
 #+BEGIN_SRC lisp :tangle example/packages.lisp
   (cl:defpackage :bodge-ui.example
@@ -25,9 +25,9 @@ Also let define a package we will evaluate our code blocks
 
 ** Window
 
-=bodge-ui= is an immediate mode GUI, meaning you need to gather input and render it yourself in
-some sort of a loop. =bodge-host= will help us with setting up all required bits to start
-displaying =bodge-ui= interfaces.
+=bodge-ui= is an immediate mode GUI, meaning you need to gather user input and render the UI
+yourself in some sort of a loop. =bodge-host= will help us with setting up all required bits to
+start displaying =bodge-ui= interfaces.
 
 
 #+BEGIN_SRC lisp :tangle example/app.lisp
@@ -55,7 +55,7 @@ displaying =bodge-ui= interfaces.
      :viewport-height *window-height*))
 #+END_SRC
 
-We would need a bit of information about user input later, so lets keep it in our application
+We need to grab user input to use it later in the example, so lets keep it in our application
 instance for now. For this example, we would track only mouse input: buttons and a cursor
 position.
 
@@ -75,8 +75,8 @@ position.
 
 
 ** Rendering
-We need a valid rendering context to bring UI onto the screen: =#'setup-rendering-context= bind
-it to whatever thread we will decide to.
+We need a valid rendering context to bring our UI onto the screen: =#'setup-rendering-context=
+will bind it to whatever thread we want rendering context in.
 #+BEGIN_SRC lisp :tangle example/app.lisp
   (cl:in-package :bodge-ui.example)
 
@@ -88,9 +88,9 @@ it to whatever thread we will decide to.
 #+END_SRC
 
 
-Once valid rendering context is bound, we can create our UI renderer provided with
+Once valid rendering context is bound, we need to create a UI renderer provided with
 =bodge-ui/renderer= system. Our =bodge-ui-app= application will also be a source of input events
-to our UI.
+to our UI (see =:input-source= argument to =#'make-ui=).
 #+BEGIN_SRC lisp :tangle example/app.lisp
   (cl:in-package :bodge-ui.example)
 
@@ -98,6 +98,7 @@ to our UI.
     (with-slots (context renderer) application
       (setf renderer (make-nuklear-renderer *window-width* *window-height*)
             context (make-ui renderer :input-source application))
+      ;; A bit of a spoiler here: we are adding our UI window described later in the example
       (add-window 'demo-window :ui context)))
 
   ;; Well, we also need to cleanup after ourselves
@@ -107,8 +108,8 @@ to our UI.
       (destroy-nuklear-renderer renderer)))
 #+END_SRC
 
-Every frame we need to rerender and recompose our UI - very useful property of immediate mode
-user interfaces: very handy for in-game menus.
+Every frame we need to rerender and recompose our UI - looks like a chore, but actually a quite
+useful property of immediate mode user interfaces: handy for in-game menus.
 #+BEGIN_SRC lisp :tangle example/app.lisp
   (cl:in-package :bodge-ui.example)
 
@@ -123,8 +124,8 @@ user interfaces: very handy for in-game menus.
       (bodge-host:swap-buffers app)))
 #+END_SRC
 
-At last, our rendering loop, although very simple one: renders our UI every iteration until
-we stop it by settting =enabled-p= to =nil=.
+At last, we about to define our rendering loop, although very simple one: it renders our UI
+every iteration until we stop it by settting =enabled-p= to =nil=.
 #+BEGIN_SRC lisp :tangle example/app.lisp
   (cl:in-package :bodge-ui.example)
 
@@ -134,8 +135,7 @@ we stop it by settting =enabled-p= to =nil=.
             do (render-example-ui application))))
 #+END_SRC
 
-Now, when all required functions are implemented, we are ready to setup a rendering thread using
-them.
+Now, when all required functions are implemented, we are ready to setup a rendering thread.
 #+BEGIN_SRC lisp :tangle example/app.lisp
   (cl:in-package :bodge-ui.example)
 
@@ -159,10 +159,10 @@ them.
 
 ** Lifecycle
 
-We need to start our rendering thread somewhere. Lets setup a couple callbacks for that,
+We need to start our rendering thread somewhere though. Lets setup a couple callbacks for that,
 starting rendering thread after application initialization and stopping render loop on
 application hiding event (fired after closing a window). We also need to make sure we are
-stopping loop in =on-destroy= callback when programmatically closing our application.
+stopping the loop in =on-destroy= callback when our application is closed programmatically.
 
 #+BEGIN_SRC lisp :tangle example/app.lisp
   (cl:in-package :bodge-ui.example)
@@ -184,16 +184,17 @@ stopping loop in =on-destroy= callback when programmatically closing our applica
 
 ** UI
 
-Finally! We've done everything required to put our UI onto screen.
+Finally! We've done everything required to put our UI onto screen and actually ready to write
+our UI bits.
 
-You might be confused a bit as to why this requires so much work comparing to /conventional/ UI
+You might be confused a lot as to why this requires so much work comparing to /conventional/ UI
 frameworks like =Qt= or =GTK=. Traditional UI frameworks won't allow you to take over their
 rendering loop or input management, while IM UI is designed with this goal in mind. This is
 super handy for games - you can render whenever you want or however you want: into texture, into
-default framebuffer, into void. You are also fully in control of user input: you can emulate it,
-attach or detach from/to any source any time.
+default framebuffer or into the void. You are also fully in control of user input: you can
+emulate it, attach or detach from/to any source any time.
 
-But, lets get back to task at hand. Here's our first window descriptor:
+But, lets get back to the task at hand. Here's our first window descriptor:
 
 #+BEGIN_SRC lisp :tangle example/ui.lisp
   (cl:in-package :bodge-ui.example)
@@ -231,8 +232,11 @@ But, lets get back to task at hand. Here's our first window descriptor:
     (button :label "Top-Level Button"))
 #+END_SRC
 
+Feel free to change the layout or window options and reevaluate the form. Your changes will be
+immediately applied while your application is running!
+
 As mentioned earlier, our application instance is also an input source for UI: lets implement
-methods that would feed input data into the UI.
+methods that would feed that input data into the UI.
 
 #+BEGIN_SRC lisp :tangle example/ui.lisp
   (cl:in-package :bodge-ui.example)
@@ -252,7 +256,7 @@ methods that would feed input data into the UI.
           cursor)))
 #+END_SRC
 
-Here we define and export a method to run our example.
+Here we define and export a function to run our example.
 #+BEGIN_SRC lisp :tangle example/app.lisp
   (cl:in-package :bodge-ui.example)
 

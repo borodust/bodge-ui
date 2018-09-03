@@ -47,6 +47,7 @@
   (with-slots (context renderer) application
     (setf renderer (make-nuklear-renderer *window-width* *window-height*)
           context (make-ui renderer :input-source application))
+    ;; A bit of a spoiler here: we are adding our UI window described later in the example
     (add-window 'demo-window :ui context)))
 
 ;; Well, we also need to cleanup after ourselves
