@@ -49,8 +49,7 @@
   (%handle-of font))
 
 
-(defmethod render-ui ((renderer nuklear-renderer) command-list)
-  (declare (ignore command-list))
+(defmethod render-ui ((renderer nuklear-renderer))
   (with-slots (width height pixel-ratio handle) renderer
     (claw:c-let ((nk-context (:struct (%nk:context)) :from bodge-ui::*handle*))
       (let ((default-font (nk-context :style :font)))

@@ -17,7 +17,7 @@
 
 (defgeneric renderer-canvas-height (renderer))
 
-(defgeneric render-ui (renderer command-list))
+(defgeneric render-ui (renderer))
 
 
 (nuklear:define-text-width-callback calc-string-width (handle height string)
@@ -47,7 +47,7 @@
 ;;;
 ;;;
 ;;;
-(defclass nuklear-context ()
+(defclass nuklear-context (disposable)
   ((handle :initarg :handle :initform (error ":handle missing") :reader %handle-of)
    (renderer :initarg :renderer :reader %renderer-of)
    (compose-tasks :initform (mt:make-guarded-reference (list)))
@@ -62,9 +62,8 @@
    (custom-widget-table :initform (make-hash-table))))
 
 
-(defun destroy-ui (nuklear-context)
-  (with-slots (handle nuklear-font) nuklear-context
-    (nuklear:destroy-context handle)))
+(define-destructor nuklear-context (handle)
+  (nuklear:destroy-context handle))
 
 
 (defmethod initialize-instance ((this nuklear-context) &rest keys &key renderer)

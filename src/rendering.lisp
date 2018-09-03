@@ -476,9 +476,9 @@
     (claw:enum-key '(:enum (%nk:command-type)) (cmd :type))))
 
 
-(defmacro docommands ((command-list) &body body)
+(defmacro docommands (() &body body)
   (with-gensyms (cmd)
-    `(nuklear:docommands (,cmd ,command-list)
+    `(nuklear:docommands (,cmd *handle*)
        (let ((*command* ,cmd))
          (if (eq (command-type) :custom)
              (process-custom-widget)
@@ -512,4 +512,4 @@
     (loop for win in (%windows-of context)
           do (compose win))
     (let ((*renderer* (%renderer-of context)))
-      (render-ui *renderer* *handle*))))
+      (render-ui *renderer*))))

@@ -1,7 +1,6 @@
 (bodge-util:define-package :bodge-ui
   (:use :cl :bodge-memory :bodge-util :bodge-math)
   (:export make-ui
-           destroy-ui
 
            push-compose-task
            with-ui-access

@@ -53,7 +53,7 @@
 ;; Well, we also need to cleanup after ourselves
 (defun release-ui (application)
   (with-slots (context renderer) application
-    (destroy-ui context)
+    (bodge-memory:dispose context)
     (destroy-nuklear-renderer renderer)))
 
 (cl:in-package :bodge-ui.example)

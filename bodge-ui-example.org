@@ -104,7 +104,7 @@ to our UI (see =:input-source= argument to =#'make-ui=).
   ;; Well, we also need to cleanup after ourselves
   (defun release-ui (application)
     (with-slots (context renderer) application
-      (destroy-ui context)
+      (bodge-memory:dispose context)
       (destroy-nuklear-renderer renderer)))
 #+END_SRC
 
