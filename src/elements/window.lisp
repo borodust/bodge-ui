@@ -89,16 +89,16 @@
     (abandon-all layout)))
 
 
-(defun add-window (window-class &rest initargs &key (ui *context*) &allow-other-keys)
+(defun add-window (ui window-class &rest initargs &key &allow-other-keys)
   (with-ui (ui)
     (%add-window ui (apply #'make-instance window-class initargs))))
 
 
-(defun remove-window (window &key (ui *context*))
+(defun remove-window (ui window)
   (%remove-window ui window))
 
 
-(defun remove-all-windows (&optional (ui *context*))
+(defun remove-all-windows (ui)
   (%remove-all-windows ui))
 
 
