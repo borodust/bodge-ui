@@ -19,21 +19,7 @@
 ;;; LAYOUT
 ;;;
 (defmacro layout ((parent-layout) &body elements)
-  (labels ((expand-element (root)
-             (when (atom root)
-               (error "Element descriptor must be a list, but got ~A" root))
-             (with-gensyms (parent)
-               (destructuring-bind (element-class &rest initargs-and-children) root
-                 (multiple-value-bind (initargs children)
-                     (bodge-util:parse-initargs-and-list initargs-and-children)
-                   `(let ((,parent (make-instance ',element-class ,@initargs)))
-                      ,@(loop for child in children
-                              collect `(adopt ,parent ,(expand-element child)))
-                      ,parent))))))
-    (once-only (parent-layout)
-      `(prog1 ,parent-layout
-         ,@(loop for element in (mapcar #'expand-element elements)
-                 collect `(adopt ,parent-layout ,element))))))
+  `(parent-tree (,parent-layout) ,@elements))
 
 
 (defun max-reducer (property-supplier)
