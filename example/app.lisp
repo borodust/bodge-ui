@@ -17,9 +17,9 @@
    ;; For the example we use OpenGL 3.3.
    ;; That's what default renderer requires.
    :opengl-version '(3 3)
-   :viewport-title "Bodge UI Example"
-   :viewport-width *window-width*
-   :viewport-height *window-height*))
+   :title "Bodge UI Example"
+   :width *window-width*
+   :height *window-height*))
 
 (cl:in-package :bodge-ui.example)
 
@@ -61,7 +61,7 @@
 (defun render-example-ui (app)
   (with-slots (context) app
     ;; Clear our background with direct OpenGL commands
-    (gl:clear-color 0.8 0.8 0.8 1.0)
+    (gl:clear-color 0.8 0.8 0.8 0.1)
     (gl:clear :color-buffer-bit)
     ;; Compose and render the UI
     (compose-ui context)
