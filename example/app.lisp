@@ -4,7 +4,7 @@
 (defvar *window-height* 600)
 
 ;; Main class of our application
-(defclass bodge-ui-app (bodge-host:application)
+(defclass bodge-ui-app (bodge-host:window)
   ;; UI context
   ((context :initform nil)
    ;; Renderer context
@@ -48,7 +48,7 @@
     (setf renderer (make-nuklear-renderer *window-width* *window-height*)
           context (make-ui renderer :input-source application))
     ;; A bit of a spoiler here: we are adding our UI window described later in the example
-    (add-window 'demo-window :ui context)))
+    (add-window context 'demo-window)))
 
 ;; Well, we also need to cleanup after ourselves
 (defun release-ui (application)
@@ -92,7 +92,7 @@
              ;; Release resources after leaving the loop
              (release-ui application))
         ;; Be sure to shutdown whole application before exiting the thread
-        (bodge-host:stop-application application)))))
+        (bodge-host:close-window application)))))
 
 (cl:in-package :bodge-ui.example)
 
@@ -113,4 +113,4 @@
 
 (export 'run)
 (defun run ()
-  (bodge-host:start-application (make-instance 'bodge-ui-app)))
+  (bodge-host:open-window (make-instance 'bodge-ui-app)))
