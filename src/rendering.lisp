@@ -442,33 +442,33 @@
     (bodge-color (cmd :col))))
 
 
-(defun custom-widget-origin ()
+(defun %custom-widget-origin ()
   (as-command (cmd %nk:command-custom)
     (vec2 (cmd :x) (%invert (cmd :y) (cmd :h)))))
 
 
-(defun custom-widget-width ()
+(defun %custom-widget-width ()
   (as-command (cmd %nk:command-custom)
     (cmd :w)))
 
 
-(defun custom-widget-height ()
+(defun %custom-widget-height ()
   (as-command (cmd %nk:command-custom)
     (cmd :h)))
 
 
-(defun custom-widget-instance ()
+(defun %custom-widget-instance ()
   (as-command (cmd %nk:command-custom)
     (let ((widget-id (cffi:pointer-address (cmd :callback-data :ptr))))
       (context-custom-widget widget-id))))
 
 
 (defun process-custom-widget ()
-  (when-let ((widget (custom-widget-instance)))
+  (when-let ((widget (%custom-widget-instance)))
     (render-custom-widget widget
-                          (custom-widget-origin)
-                          (custom-widget-width)
-                          (custom-widget-height))))
+                          (%custom-widget-origin)
+                          (%custom-widget-width)
+                          (%custom-widget-height))))
 
 
 (defun command-type ()

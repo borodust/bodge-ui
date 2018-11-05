@@ -12,6 +12,12 @@
 (defgeneric update-widget (widget)
   (:method (widget) (declare (ignore widget))))
 
+(defgeneric custom-widget-width (widget)
+  (:method (widget) (declare (ignore widget))))
+
+(defgeneric custom-widget-height (widget)
+  (:method (widget) (declare (ignore widget))))
+
 (defclass custom-widget (disposable widget)
   ((id :initform (%next-custom-widget-id) :reader %id-of)
    (hovering-listener :initarg :on-hover :initform nil)
@@ -32,6 +38,10 @@
 
 (define-destructor custom-widget (bounds)
   (claw:free bounds))
+
+
+(defmethod calc-bounds ((this custom-widget))
+  (values (custom-widget-width this) (custom-widget-height this)))
 
 
 (defmethod update-widget ((this custom-widget))

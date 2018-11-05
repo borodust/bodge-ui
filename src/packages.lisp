@@ -40,9 +40,10 @@
 
            deflayout
            custom-widget
-           find-custom-widget-from-command
            render-custom-widget
            initialize-custom-layout
+           custom-widget-width
+           custom-widget-height
            custom-widget-hovered-p
            custom-widget-clicked-p
            custom-widget-pressed-p
