@@ -16,6 +16,7 @@
            render-ui
 
            defwindow
+           find-element
            on-window-close
            add-window
            remove-window
@@ -25,6 +26,7 @@
            horizontal-layout
            button
            label
+           text-edit
            combo-box
            color-box
            spacing
