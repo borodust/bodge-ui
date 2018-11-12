@@ -136,6 +136,11 @@
     (call-next-method)))
 
 
+(defmethod children-of ((this widget))
+  (declare (ignore this))
+  nil)
+
+
 ;;;
 ;;; BEHAVIOR ELEMENT
 ;;;

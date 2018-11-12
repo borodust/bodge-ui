@@ -26,11 +26,10 @@
       (claw:c-let ((buf (:struct (%nk:text-edit)) :from buffer))
         (let* ((str-info (buf :string))
                (len (%nk:str-len-char str-info)))
-          (let ((ptr (%nk:str-get-const str-info)))
-            (or (cffi:foreign-string-to-lisp ptr
-                                             :count len
+          (if-let ((ptr (%nk:str-get-const str-info)))
+            (cffi:foreign-string-to-lisp ptr :count len
                                              :encoding :utf-8)
-                "")))))))
+            ""))))))
 
 
 (defmethod compose ((this text-edit))

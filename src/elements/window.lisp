@@ -7,7 +7,7 @@
 ;;;
 ;;;
 ;;;
-(defclass window (disposable basic-panel)
+(defclass window (disposable named basic-panel)
   ((x :initarg :x :initform 0.0)
    (y :initarg :y :initform 0.0)
    (width :initform nil)

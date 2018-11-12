@@ -40,6 +40,8 @@
            notebook
            tab
 
+           text-of
+
            deflayout
            custom-widget
            render-custom-widget
