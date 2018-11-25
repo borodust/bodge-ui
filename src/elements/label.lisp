@@ -11,7 +11,7 @@
 
 
 (defclass label (widget)
-  ((text :initarg :text :initform "")
+  ((text :initarg :text :initform "" :reader text-of)
    (align :initarg :align)))
 
 

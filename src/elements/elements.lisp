@@ -2,14 +2,16 @@
 
 (defvar *radio-group* nil)
 
-
-(defgeneric compose (element))
-
 (defvar *zero-vec2* (make-instance '%vec2 :x 0f0 :y 0f0))
 (defvar *one-vec2* (make-instance '%vec2 :x 1f0 :y 1f0))
 (defvar *nk-buttons* (list %nk:+button-left+ :left
                            %nk:+button-right+ :right
                            %nk:+button-middle+ :middle))
+
+
+(defgeneric compose (element))
+(defgeneric text-of (element))
+(defgeneric (setf text-of) (value element))
 
 
 (defclass named ()

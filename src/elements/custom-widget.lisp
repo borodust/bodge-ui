@@ -18,6 +18,21 @@
 (defgeneric custom-widget-height (widget)
   (:method (widget) (declare (ignore widget))))
 
+(defgeneric custom-widget-on-hover (widget)
+  (:method (widget) (declare (ignore widget))))
+
+(defgeneric custom-widget-on-leave (widget)
+  (:method (widget) (declare (ignore widget))))
+
+(defgeneric custom-widget-on-click (widget button)
+  (:method (widget button) (declare (ignore widget button))))
+
+(defgeneric custom-widget-on-mouse-press (widget button)
+  (:method (widget button) (declare (ignore widget button))))
+
+(defgeneric custom-widget-on-mouse-release (widget button)
+  (:method (widget button) (declare (ignore widget button))))
+
 (defclass custom-widget (disposable widget)
   ((id :initform (%next-custom-widget-id) :reader %id-of)
    (hovering-listener :initarg :on-hover :initform nil)
@@ -70,25 +85,32 @@
               (pressed-buttons (loop for (nk-key key) on *nk-buttons* by #'cddr
                                      when (widget-pressed-p nk-key)
                                        collect key)))
-          (when (and hovering-listener (not this-hovered-p) hovered-p)
-            (funcall hovering-listener *window*))
-          (when (and leaving-listener this-hovered-p (not hovered-p))
-            (funcall leaving-listener *window*))
-          (when clicking-listener
-            (when-let ((new-clicked-buttons (set-difference clicked-buttons
-                                                            this-clicked-buttons)))
-              (loop for button in new-clicked-buttons
-                    do (funcall clicking-listener *window* :button button :allow-other-keys t))))
-          (when pressing-listener
-            (when-let ((new-pressed-buttons (set-difference pressed-buttons
-                                                            this-pressed-buttons)))
-              (loop for button in new-pressed-buttons
-                    do (funcall pressing-listener *window* :button button :allow-other-keys t))))
-          (when releasing-listener
-            (when-let ((released-buttons (set-difference this-pressed-buttons
-                                                         pressed-buttons)))
-              (loop for button in released-buttons
-                    do (funcall releasing-listener *window* :button button :allow-other-keys t))))
+          (when (and (not this-hovered-p) hovered-p)
+            (custom-widget-on-hover this)
+            (when hovering-listener
+              (funcall hovering-listener *window*)))
+          (when (and this-hovered-p (not hovered-p))
+            (custom-widget-on-leave this)
+            (when leaving-listener
+              (funcall leaving-listener *window*)))
+          (when-let ((new-clicked-buttons (set-difference clicked-buttons
+                                                          this-clicked-buttons)))
+            (loop for button in new-clicked-buttons
+                  do (custom-widget-on-click this button)
+                     (when clicking-listener
+                       (funcall clicking-listener *window* :button button :allow-other-keys t))))
+          (when-let ((new-pressed-buttons (set-difference pressed-buttons
+                                                          this-pressed-buttons)))
+            (loop for button in new-pressed-buttons
+                  do (custom-widget-on-mouse-press this button)
+                     (when pressing-listener
+                       (funcall pressing-listener *window* :button button :allow-other-keys t))))
+          (when-let ((released-buttons (set-difference this-pressed-buttons
+                                                       pressed-buttons)))
+            (loop for button in released-buttons
+                  do (custom-widget-on-mouse-release this button)
+                     (when releasing-listener
+                       (funcall releasing-listener *window* :button button :allow-other-keys t))))
           (setf this-hovered-p hovered-p
                 this-clicked-buttons clicked-buttons
                 this-pressed-buttons pressed-buttons))))))

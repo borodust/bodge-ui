@@ -48,6 +48,11 @@
            initialize-custom-layout
            custom-widget-width
            custom-widget-height
+           custom-widget-on-hover
+           custom-widget-on-leave
+           custom-widget-on-click
+           custom-widget-on-mouse-press
+           custom-widget-on-mouse-release
            custom-widget-hovered-p
            custom-widget-clicked-p
            custom-widget-pressed-p
