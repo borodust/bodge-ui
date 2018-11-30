@@ -51,6 +51,7 @@
            custom-widget-on-hover
            custom-widget-on-leave
            custom-widget-on-click
+           custom-widget-on-move
            custom-widget-on-mouse-press
            custom-widget-on-mouse-release
            custom-widget-hovered-p

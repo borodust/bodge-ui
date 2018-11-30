@@ -495,10 +495,10 @@
                 (if key
                     (register-keyboard-input key state)
                     (return))))
-        (when-let* ((cursor (last-cursor-position input-source
+        (let* ((cursor (last-cursor-position input-source
                                              (%last-cursor-position-of context)))
-                    (x (x cursor))
-                    (y (y cursor)))
+               (x (x cursor))
+               (y (y cursor)))
           (loop (multiple-value-bind (button state) (next-mouse-interaction input-source)
                   (if button
                       (register-mouse-input x y button state)
