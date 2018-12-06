@@ -57,6 +57,9 @@
            custom-widget-hovered-p
            custom-widget-clicked-p
            custom-widget-pressed-p
+           discard-custom-widget-state
+           transition-custom-widget-to
+           custom-widget-instance
 
            next-keyboard-interaction
            next-mouse-interaction

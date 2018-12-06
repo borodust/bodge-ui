@@ -1,5 +1,7 @@
 (cl:in-package :bodge-ui)
 
+
+(declaim (special *active-custom-widget*))
 ;;;
 ;;; CUSTOM WIDGET
 ;;;
@@ -30,6 +32,9 @@
 (defgeneric custom-widget-on-move (widget x y)
   (:method (widget x y) (declare (ignore widget x y))))
 
+(defgeneric discard-custom-widget-state (state)
+  (:method (state) (declare (ignore state))))
+
 (defclass custom-widget (disposable widget)
   ((id :initform (%next-custom-widget-id) :reader %id-of)
    (hovering-listener :initarg :on-hover :initform nil)
@@ -40,16 +45,36 @@
    (bounds)
    (clicked-buttons :initform nil)
    (pressed-buttons :initform nil)
-   (hovered-p :initform nil)))
+   (hovered-p :initform nil)
+   (state :initform nil)))
+
+
+(defmethod initialize-instance :around ((this custom-widget) &key)
+  (let ((*active-custom-widget* this))
+    (call-next-method)))
 
 
 (defmethod initialize-instance :after ((this custom-widget) &key)
-  (with-slots (bounds) this
-    (setf bounds (claw:calloc '(:struct (%nk:rect))))))
+  (with-slots (bounds state) this
+    (setf bounds (claw:calloc '(:struct (%nk:rect)))
+          ;; self-reference here should be safe enough - SBCL correctly collects the instance
+          ;; maybe test on other implementations
+          state this)))
 
 
 (define-destructor custom-widget (bounds)
   (claw:free bounds))
+
+
+(defun transition-custom-widget-to (widget state-class &rest initargs &key &allow-other-keys)
+  (with-slots (state) widget
+    (let ((*active-custom-widget* widget))
+      (discard-custom-widget-state state)
+      (setf state (apply #'make-instance state-class initargs)))))
+
+
+(defun custom-widget-instance ()
+  *active-custom-widget*)
 
 
 (defmethod calc-bounds ((this custom-widget))
@@ -57,6 +82,7 @@
 
 
 (defun update-widget (this x y width height)
+  (declare (ignore width))
   (with-slots ((this-clicked-buttons clicked-buttons)
                (this-pressed-buttons pressed-buttons)
                (this-hovered-p hovered-p)
@@ -65,7 +91,8 @@
                clicking-listener
                pressing-listener
                releasing-listener
-               bounds)
+               bounds
+               state)
       this
     (claw:c-let ((ctx (:struct (%nk:context)) :from *handle*))
       (flet ((widget-hovered-p ()
@@ -77,7 +104,8 @@
                                                                      button
                                                                      bounds
                                                                      %nk:+true+))))
-        (let ((hovered-p (widget-hovered-p))
+        (let ((*active-custom-widget* this)
+              (hovered-p (widget-hovered-p))
               (clicked-buttons (loop for (nk-key key) on *nk-buttons* by #'cddr
                                      when (widget-clicked-p nk-key)
                                        collect key))
@@ -85,29 +113,29 @@
                                      when (widget-pressed-p nk-key)
                                        collect key)))
           (when (and (not this-hovered-p) hovered-p)
-            (custom-widget-on-hover this)
+            (custom-widget-on-hover state)
             (when hovering-listener
               (funcall hovering-listener *window*)))
           (when (and this-hovered-p (not hovered-p))
-            (custom-widget-on-leave this)
+            (custom-widget-on-leave state)
             (when leaving-listener
               (funcall leaving-listener *window*)))
           (when-let ((new-clicked-buttons (set-difference clicked-buttons
                                                           this-clicked-buttons)))
             (loop for button in new-clicked-buttons
-                  do (custom-widget-on-click this button)
+                  do (custom-widget-on-click state button)
                      (when clicking-listener
                        (funcall clicking-listener *window* :button button :allow-other-keys t))))
           (when-let ((new-pressed-buttons (set-difference pressed-buttons
                                                           this-pressed-buttons)))
             (loop for button in new-pressed-buttons
-                  do (custom-widget-on-mouse-press this button)
+                  do (custom-widget-on-mouse-press state button)
                      (when pressing-listener
                        (funcall pressing-listener *window* :button button :allow-other-keys t))))
           (when-let ((released-buttons (set-difference this-pressed-buttons
                                                        pressed-buttons)))
             (loop for button in released-buttons
-                  do (custom-widget-on-mouse-release this button)
+                  do (custom-widget-on-mouse-release state button)
                      (when releasing-listener
                        (funcall releasing-listener *window* :button button :allow-other-keys t))))
           (let ((mouse-x (ctx :input :mouse :pos :x))
@@ -115,7 +143,7 @@
                 (prev-x (ctx :input :mouse :prev :x))
                 (prev-y (ctx :input :mouse :prev :y)))
             (when (and (or (/= prev-x mouse-x) (/= prev-y mouse-y)) hovered-p)
-              (custom-widget-on-move this (- mouse-x x) (- height (- mouse-y y)))))
+              (custom-widget-on-move state (- mouse-x x) (- height (- mouse-y y)))))
           (setf this-hovered-p hovered-p
                 this-clicked-buttons clicked-buttons
                 this-pressed-buttons pressed-buttons))))))
