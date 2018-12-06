@@ -199,7 +199,7 @@ But, lets get back to the task at hand. Here's our first window descriptor:
 #+BEGIN_SRC lisp :tangle example/ui.lisp
   (cl:in-package :bodge-ui.example)
 
-  (defwindow (demo-window
+  (defpanel (demo-window
               (:title "Hello Bodge UI")
               (:origin 200 50)
               (:width 400) (:height 400)

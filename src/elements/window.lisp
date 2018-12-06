@@ -183,7 +183,7 @@
       (setf option-mask (apply #'nk:panel-mask (to-nuklear-opts opts))))))
 
 
-(defmacro defwindow (name-and-opts &body layout)
+(defmacro defpanel (name-and-opts &body layout)
   (flet ((filter-window-initargs (opts)
            (loop with special-keywords = '(:inherit :options)
                  for (key . value) in opts

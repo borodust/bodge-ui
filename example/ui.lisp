@@ -1,6 +1,6 @@
 (cl:in-package :bodge-ui.example)
 
-(defwindow (demo-window
+(defpanel (demo-window
             (:title "Hello Bodge UI")
             (:origin 200 50)
             (:width 400) (:height 400)

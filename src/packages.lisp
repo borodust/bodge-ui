@@ -15,7 +15,7 @@
            renderer-default-font
            render-ui
 
-           defwindow
+           defpanel
            find-element
            on-window-close
            add-window
