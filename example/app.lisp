@@ -48,7 +48,7 @@
     (setf renderer (make-nuklear-renderer *window-width* *window-height*)
           context (make-ui renderer :input-source application))
     ;; A bit of a spoiler here: we are adding our UI window described later in the example
-    (add-window context 'demo-window)))
+    (add-panel context 'demo-window)))
 
 ;; Well, we also need to cleanup after ourselves
 (defun release-ui (application)

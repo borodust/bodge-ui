@@ -17,10 +17,10 @@
 
            defpanel
            find-element
-           on-window-close
-           add-window
-           remove-window
-           remove-all-windows
+           on-panel-close
+           add-panel
+           remove-panel
+           remove-all-panels
 
            vertical-layout
            horizontal-layout

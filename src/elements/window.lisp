@@ -23,7 +23,7 @@
    (redefined-p :initform nil)))
 
 
-(defgeneric on-window-close (window)
+(defgeneric on-panel-close (window)
   (:method ((this window)) (declare (ignore this))))
 
 
@@ -89,17 +89,17 @@
     (abandon-all layout)))
 
 
-(defun add-window (ui window-class &rest initargs &key &allow-other-keys)
+(defun add-panel (ui window-class &rest initargs &key &allow-other-keys)
   (with-ui (ui)
-    (%add-window ui (apply #'make-instance window-class initargs))))
+    (%add-panel ui (apply #'make-instance window-class initargs))))
 
 
-(defun remove-window (ui window)
-  (%remove-window ui window))
+(defun remove-panel (ui window)
+  (%remove-panel ui window))
 
 
-(defun remove-all-windows (ui)
-  (%remove-all-windows ui))
+(defun remove-all-panels (ui)
+  (%remove-all-panels ui))
 
 
 (defun find-element (name &optional (window *window*))
@@ -148,7 +148,7 @@
       (when (or (/= %nk:+false+ (%nk:window-is-hidden *handle* (%panel-id-of this)))
                 (/= %nk:+false+ (%nk:window-is-closed *handle* (%panel-id-of this))))
         (setf hidden-p t)
-        (on-window-close this)))))
+        (on-panel-close this)))))
 
 
 (defmethod update-instance-for-redefined-class :after ((this window)

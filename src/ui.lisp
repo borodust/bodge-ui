@@ -83,17 +83,17 @@
                  :renderer renderer))
 
 
-(defun %add-window (ui window)
+(defun %add-panel (ui window)
   (push window (%windows-of ui))
   window)
 
 
-(defun %remove-window (ui window)
+(defun %remove-panel (ui window)
   (alexandria:deletef (%windows-of ui) window)
   (%nk:window-close (%handle-of ui) (%panel-id-of window)))
 
 
-(defun %remove-all-windows (ui)
+(defun %remove-all-panels (ui)
   (let ((ui-handle (%handle-of ui)))
     (dolist (window (%windows-of ui))
       (%nk:window-close ui-handle (%panel-id-of window))))
