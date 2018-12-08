@@ -5,6 +5,7 @@
            push-compose-task
            with-ui-access
            compose-ui
+           root-panel
 
            custom-font
            calculate-text-width

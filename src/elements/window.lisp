@@ -151,6 +151,10 @@
         (on-panel-close this)))))
 
 
+(defun root-panel ()
+  *window*)
+
+
 (defmethod update-instance-for-redefined-class :after ((this window)
                                                        added-slots
                                                        discarded-slots

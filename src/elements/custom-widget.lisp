@@ -37,6 +37,7 @@
 
 (defclass custom-widget (disposable widget)
   ((id :initform (%next-custom-widget-id) :reader %id-of)
+   (root-window :initform nil :reader %root-window-of)
    (hovering-listener :initarg :on-hover :initform nil)
    (leaving-listener :initarg :on-leave :initform nil)
    (clicking-listener :initarg :on-click :initform nil)
@@ -66,11 +67,18 @@
   (claw:free bounds))
 
 
+(defmethod render-custom-widget :around ((this custom-widget) origin width height)
+  (let ((*window* (%root-window-of this)))
+    (call-next-method)))
+
+
 (defun transition-custom-widget-to (widget state-class &rest initargs &key &allow-other-keys)
   (with-slots (state) widget
     (let ((*active-custom-widget* widget))
       (discard-custom-widget-state state)
-      (setf state (apply #'make-instance state-class initargs)))))
+      (setf state (if state-class
+                      (apply #'make-instance state-class initargs)
+                      widget)))))
 
 
 (defun custom-widget-instance ()
@@ -92,8 +100,10 @@
                pressing-listener
                releasing-listener
                bounds
-               state)
+               state
+               root-window)
       this
+    (setf root-window *window*)
     (claw:c-let ((ctx (:struct (%nk:context)) :from *handle*))
       (flet ((widget-hovered-p ()
                (= %nk:+true+ (%nk:input-is-mouse-hovering-rect (ctx :input) bounds)))
