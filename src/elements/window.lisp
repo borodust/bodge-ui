@@ -23,7 +23,7 @@
    (redefined-p :initform nil)))
 
 
-(defgeneric on-panel-close (window)
+(defgeneric on-close (element)
   (:method ((this window)) (declare (ignore this))))
 
 
@@ -148,7 +148,7 @@
       (when (or (/= %nk:+false+ (%nk:window-is-hidden *handle* (%panel-id-of this)))
                 (/= %nk:+false+ (%nk:window-is-closed *handle* (%panel-id-of this))))
         (setf hidden-p t)
-        (on-panel-close this)))))
+        (on-close this)))))
 
 
 (defun root-panel ()

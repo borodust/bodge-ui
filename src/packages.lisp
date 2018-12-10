@@ -18,7 +18,7 @@
 
            defpanel
            find-element
-           on-panel-close
+           on-close
            add-panel
            remove-panel
            remove-all-panels
