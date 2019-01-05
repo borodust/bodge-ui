@@ -9,7 +9,8 @@
 
 (defclass radio-group (behavior-element)
   ((radio-list :initform nil)
-   (active :initform nil))
+   (active :initform nil :reader active-radio-button-of)
+   (on-change :initform nil :initarg :on-change))
   (:default-initargs :delegate (make-instance 'vertical-layout)))
 
 
@@ -25,12 +26,15 @@
 
 
 (defun activate-radio (radio)
-  (with-slots (radio-list active) *radio-group*
+  (with-slots (radio-list active on-change) *radio-group*
     (when *radio-group*
-      (setf active radio)
-      (loop for that-radio in radio-list
-            unless (eq that-radio radio)
-              do (setf (activated that-radio) nil)))))
+      (let ((old-active active))
+        (setf active radio)
+        (loop for that-radio in radio-list
+              unless (eq that-radio radio)
+                do (setf (activated that-radio) nil))
+        (unless (or (null on-change) (eq old-active radio))
+          (funcall on-change *window* radio))))))
 
 
 (defmethod compose :around ((this radio-group))

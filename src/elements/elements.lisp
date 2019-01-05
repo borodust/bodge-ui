@@ -146,7 +146,7 @@
 ;;;
 ;;; BEHAVIOR ELEMENT
 ;;;
-(defclass behavior-element ()
+(defclass behavior-element (named)
   ((delegate :initarg :delegate :initform (error ":delegate missing"))))
 
 

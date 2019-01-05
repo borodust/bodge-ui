@@ -23,6 +23,7 @@
            remove-panel
            remove-all-panels
 
+           name-of
            vertical-layout
            horizontal-layout
            button
@@ -36,6 +37,7 @@
            radio
            activated
            radio-group
+           active-radio-button-of
            check-box
            checked
            notebook
