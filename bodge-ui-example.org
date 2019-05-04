@@ -52,7 +52,8 @@ start displaying =bodge-ui= interfaces.
      :opengl-version '(3 3)
      :title "Bodge UI Example"
      :width *window-width*
-     :height *window-height*))
+     :height *window-height*
+     :autoscaled nil))
 #+END_SRC
 
 We need to grab user input to use it later in the example, so lets keep it in our application

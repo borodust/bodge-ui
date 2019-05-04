@@ -19,7 +19,8 @@
    :opengl-version '(3 3)
    :title "Bodge UI Example"
    :width *window-width*
-   :height *window-height*))
+   :height *window-height*
+   :autoscaled nil))
 
 (cl:in-package :bodge-ui.example)
 
