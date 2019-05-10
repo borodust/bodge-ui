@@ -19,6 +19,8 @@
 
 (defgeneric render-ui (renderer))
 
+(defun invert-y (y &optional (height 0))
+  (- (renderer-canvas-height (%renderer-of *context*)) y height))
 
 (nuklear:define-text-width-callback calc-string-width (handle height string)
   (calculate-text-width (renderer-default-font (%renderer-of *context*)) string))

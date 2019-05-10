@@ -122,7 +122,7 @@
   (with-slots (x y width height title option-mask layout bounds panel-spacing) win
     (claw:c-val ((bounds (:struct (%nk:rect))))
       (setf (bounds :x) (float x 0f0)
-            (bounds :y) (float (- (renderer-canvas-height (%renderer-of *context*)) y height) 0f0)
+            (bounds :y) (float (invert-y y height) 0f0)
             (bounds :w) (float width 0f0)
             (bounds :h) (float height 0f0))
       (let ((val (%nk:begin-titled *handle* (%panel-id-of win) title bounds option-mask)))
