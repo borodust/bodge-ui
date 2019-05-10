@@ -18,7 +18,11 @@
 
            defpanel
            find-element
+           hiddenp
+           minimizedp
            on-close
+           on-minimize
+           on-restore
            add-panel
            remove-panel
            remove-all-panels
