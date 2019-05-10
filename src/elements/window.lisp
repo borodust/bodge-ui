@@ -193,7 +193,13 @@
                  for (key . value) in opts
                  unless (member key special-keywords)
                    append (case key
-                            (:origin (list key `(vec2 ,(or (first value) 0) ,(or (second value) 0))))
+                            (:origin (list key `(vec2 ,(or (first value) 0)
+                                                      ,(or (second value) 0))))
+                            (:background-color
+                             (list key `(vec4 ,(or (first value) 0)
+                                              ,(or (second value) 0)
+                                              ,(or (third value) 0)
+                                              ,(or (fourth value) 1))))
                             (t (list key (first value)))))))
     (destructuring-bind (name &rest opts) (ensure-list name-and-opts)
       (with-gensyms (layout-parent)

@@ -250,8 +250,8 @@
 
 
 (defmethod initialize-instance :after ((this color-style-item)
-                                       &key (red 0f0) (green 0f0) (blue 0f0) (alpha 1f0))
-  (style-item-color (%handle-of this) red green blue alpha))
+                                       &key color)
+  (style-item-color (%handle-of this) (x color) (y color) (z color) (w color)))
 
 
 (defclass %vec2 (disposable)
