@@ -34,6 +34,12 @@
   (:method ((this window)) (declare (ignore this))))
 
 
+(defun update-panel-position (window x y)
+  (nk:with-vec2 (vec)
+    (setf (vec :x) x
+	  (vec :y) (invert-y y))
+    (%nk:window-set-position *handle* (%panel-id-of window) vec)))
+
 (defun hide-window (window)
   (with-slots (hidden-p) window
     (unless hidden-p
