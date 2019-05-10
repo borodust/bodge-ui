@@ -36,8 +36,8 @@
 
 (defun update-panel-position (window x y)
   (nk:with-vec2 (vec)
-    (setf (vec :x) x
-	  (vec :y) (invert-y y))
+    (setf (vec :x) (float x 0f0)
+          (vec :y) (float (invert-y y) 0f0))
     (%nk:window-set-position *handle* (%panel-id-of window) vec)))
 
 (defun hide-window (window)
