@@ -19,26 +19,73 @@
    (option-mask :initarg :option-mask :initform '())
    (style :initform (make-default-style))
    (layout :initform (make-instance 'vertical-layout))
-   (bounds :initform (claw:alloc '(:struct (%nk:rect))))
+   (bounds :initform (claw:calloc '(:struct (%nk:rect))))
    (panel-spacing :initform (make-instance '%vec2))
-   (redefined-p :initform nil)))
+   (redefined-p :initform nil)
+   (bounds-updated-p :initform nil)))
 
 
 (defgeneric on-close (element)
   (:method ((this window)) (declare (ignore this))))
 
+
 (defgeneric on-minimize (element)
   (:method ((this window)) (declare (ignore this))))
+
 
 (defgeneric on-restore (element)
   (:method ((this window)) (declare (ignore this))))
 
 
-(defun update-panel-position (window x y)
-  (nk:with-vec2 (vec)
-    (setf (vec :x) (float x 0f0)
-          (vec :y) (float (invert-y y) 0f0))
-    (%nk:window-set-position *handle* (%panel-id-of window) vec)))
+(defun update-panel-position (panel x y)
+  (with-slots ((this-x x) (this-y y) bounds-updated-p) panel
+    (setf this-x x
+          this-y y
+          bounds-updated-p t)))
+
+
+(defun update-panel-size (panel width height)
+  (with-slots ((this-width width) (this-height height) bounds-updated-p) panel
+    (setf this-width width
+          this-height height
+          bounds-updated-p t)))
+
+
+(defun %panel-position (panel)
+  (with-slots (x y) panel
+    (values x y)))
+
+
+(defmacro with-panel-position ((x y) panel &body body)
+  `(multiple-value-bind (,x ,y) (%panel-position ,panel)
+     (declare (ignorable ,x ,y))
+     ,@body))
+
+
+(defun panel-position (panel &optional (result-vec2 (vec2)))
+  (with-panel-position (x y) panel
+    (setf (x result-vec2) x
+          (y result-vec2) y)
+    result-vec2))
+
+
+(defun %panel-dimensions (panel)
+  (with-slots (width height) panel
+    (values width height)))
+
+
+(defmacro with-panel-dimensions ((width height) panel &body body)
+  `(multiple-value-bind (,width ,height) (%panel-dimensions ,panel)
+     (declare (ignorable ,width ,height))
+     ,@body))
+
+
+(defun panel-size (panel &optional (result-vec2 (vec2)))
+  (with-panel-dimensions (width height) panel
+    (setf (x result-vec2) width
+          (y result-vec2) height)
+    result-vec2))
+
 
 (defun hide-window (window)
   (with-slots (hidden-p) window
@@ -125,17 +172,28 @@
 
 
 (defun compose-window (win)
-  (with-slots (x y width height title option-mask layout bounds panel-spacing) win
+  (with-slots (x y width height title option-mask layout
+               bounds bounds-updated-p
+               panel-spacing)
+      win
     (claw:c-val ((bounds (:struct (%nk:rect))))
       (setf (bounds :x) (float x 0f0)
             (bounds :y) (float (invert-y y height) 0f0)
             (bounds :w) (float width 0f0)
             (bounds :h) (float height 0f0))
+      (when bounds-updated-p
+        (%nk:window-set-bounds *handle* (%panel-id-of win) bounds)
+        (setf bounds-updated-p nil))
       (let ((val (%nk:begin-titled *handle* (%panel-id-of win) title bounds option-mask)))
         (unwind-protect
              (unless (= 0 val)
+               (%nk:window-get-bounds bounds *handle*)
                (setf (%x panel-spacing) (style :layout-spacing)
-                     (%y panel-spacing) (style :layout-spacing))
+                     (%y panel-spacing) (style :layout-spacing)
+                     width (bounds :w)
+                     height (bounds :h)
+                     x (bounds :x)
+                     y (invert-y (bounds :y) height))
                (with-styles ((:window :spacing) panel-spacing
                              (:window :padding) *zero-vec2*
                              (:window :group-padding) *zero-vec2*)
@@ -147,12 +205,14 @@
 
 
 (defmethod compose ((this window))
-  (with-slots (background-style-item hidden-p redefined-p style collapsed-p)
+  (with-slots (background-style-item hidden-p redefined-p style collapsed-p
+               bounds-updated-p)
       this
     (unless hidden-p
       (when redefined-p
         (reinitialize-window this)
-        (setf redefined-p nil))
+        (setf redefined-p nil
+              bounds-updated-p t))
       (with-styles ((:window :fixed-background) background-style-item)
         (let* ((*window* this)
                (*style* style)

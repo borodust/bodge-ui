@@ -24,6 +24,11 @@
            on-minimize
            on-restore
            update-panel-position
+           panel-position
+           with-panel-position
+           update-panel-size
+           with-panel-dimensions
+           panel-size
            add-panel
            remove-panel
            remove-all-panels
