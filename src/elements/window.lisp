@@ -16,7 +16,6 @@
    (title :initarg :title :initform "")
    (hidden-p :initform nil :reader hiddenp)
    (collapsed-p :initform nil :reader collapsed-p)
-   (collapsed-listener :initarg :on-collapse :initform nil)
    (option-mask :initarg :option-mask :initform '())
    (style :initform (make-default-style))
    (layout :initform (make-instance 'vertical-layout))
@@ -28,6 +27,11 @@
 (defgeneric on-close (element)
   (:method ((this window)) (declare (ignore this))))
 
+(defgeneric on-minimize (element)
+  (:method ((this window)) (declare (ignore this))))
+
+(defgeneric on-restore (element)
+  (:method ((this window)) (declare (ignore this))))
 
 (defun hide-window (window)
   (with-slots (hidden-p) window
@@ -136,7 +140,7 @@
 
 
 (defmethod compose ((this window))
-  (with-slots (background-style-item hidden-p redefined-p style  collapsed-p collapsed-listener)
+  (with-slots (background-style-item hidden-p redefined-p style  collapsed-p)
       this
     (unless hidden-p
       (when redefined-p
@@ -154,13 +158,11 @@
       (when (and (/= %nk:+false+ (%nk:window-is-collapsed *handle* (%panel-id-of this)))
 		 (null collapsed-p))
 	(setf collapsed-p t)
-	(when collapsed-listener
-	  (funcall collapsed-listener this :collapsed-p collapsed-p :allow-other-keys t)))
+	(on-minimize this))
       (when (and (= %nk:+false+ (%nk:window-is-collapsed *handle* (%panel-id-of this)))
 		 collapsed-p)
 	(setf collapsed-p nil)
-	(when collapsed-listener
-	  (funcall collapsed-listener this :collapsed-p collapsed-p :allow-other-keys t))))))
+	(on-restore this)))))
 		
 
 
