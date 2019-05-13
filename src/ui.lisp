@@ -179,7 +179,7 @@
 (defun register-scroll-input (x y)
   (claw:c-with ((vec (:struct (%nk:vec2))))
     (setf (vec :x) (float x 0f0)
-          (vec :y) (float y 0f0))
+          (vec :y) (- (float y 0f0)))
     (%nk:input-scroll *handle* vec)))
 
 
