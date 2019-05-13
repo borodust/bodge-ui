@@ -12,6 +12,10 @@
    (y :initarg :y :initform 0.0)
    (width :initform nil)
    (height :initform nil)
+   (max-width :initform nil :initarg :max-width)
+   (max-height :initform nil :initarg :max-height)
+   (min-width :initform nil :initarg :min-width)
+   (min-height :initform nil :initarg :min-height)
    (background-style-item :initform nil)
    (title :initarg :title :initform "")
    (hidden-p :initform nil :reader hiddenp)
@@ -36,8 +40,10 @@
 (defgeneric on-restore (element)
   (:method ((this window)) (declare (ignore this))))
 
+
 (defgeneric on-move (element)
   (:method ((this window)) (declare (ignore this))))
+
 
 (defun update-panel-position (panel x y)
   (with-slots ((this-x x) (this-y y) bounds-updated-p) panel
@@ -107,15 +113,25 @@
                               (origin (vec2 0 0))
                               (title "") (background-color nil)
                               (hidden nil)
+                              max-height
+                              max-width
+                              min-height
+                              min-width
                      &allow-other-keys)
   (with-slots ((w width) (h height) (this-x x) (this-y y) background-style-item
-               option-mask (this-title title))
+               option-mask (this-title title)
+               (this-max-height max-height) (this-max-width max-width)
+               (this-min-height min-height) (this-min-width min-width))
       window
     (setf w (float width 0f0)
           h (float height 0f0)
           this-x (x origin)
           this-y (y origin)
-          this-title title)
+          this-title title
+          this-max-height max-height
+          this-max-width max-width
+          this-min-height min-height
+          this-min-width min-width)
     (when background-color
       (setf background-style-item (make-instance 'color-style-item :color background-color)))
     (when hidden
@@ -173,11 +189,29 @@
     (%find-element window name)))
 
 
+(defun %ensure-window-dimensions (win)
+  (with-slots (width height
+               max-width max-height
+               min-width min-height
+               bounds-updated-p)
+      win
+    (let ((min-width (or min-width 0))
+          (min-height (or min-height 0))
+          (max-width (or max-width width))
+          (max-height (or max-height height)))
+      (unless (and (<= min-width width max-width )
+                   (<= min-height height max-height))
+        (setf width (alexandria:clamp width min-width max-width)
+              height (alexandria:clamp height min-height max-height)
+              bounds-updated-p t)))))
+
+
 (defun compose-window (win)
   (with-slots (x y width height title option-mask layout
                bounds bounds-updated-p
                panel-spacing)
       win
+    (%ensure-window-dimensions win)
     (claw:c-val ((bounds (:struct (%nk:rect))))
       (setf (bounds :x) (float x 0f0)
             (bounds :y) (float (invert-y y height) 0f0)
