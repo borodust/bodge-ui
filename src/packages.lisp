@@ -23,6 +23,7 @@
            on-close
            on-minimize
            on-restore
+           on-move
            update-panel-position
            panel-position
            with-panel-position
