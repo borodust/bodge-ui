@@ -36,8 +36,9 @@
     (claw:c-let ((buf (:struct (%nk:text-edit)) :from buffer))
       (let ((str-info (buf :string)))
         (%nk:str-clear str-info)
-        (cffi:with-foreign-string (string-ptr value :encoding :utf-8)
-          (%nk:str-append-str-utf8 str-info string-ptr))))
+        (unless (alexandria:emptyp value)
+          (cffi:with-foreign-string (string-ptr value :encoding :utf-8)
+            (%nk:str-append-text-utf8 str-info string-ptr (length value))))))
     value))
 
 
