@@ -36,6 +36,8 @@
 (defgeneric on-restore (element)
   (:method ((this window)) (declare (ignore this))))
 
+(defgeneric on-move (element)
+  (:method ((this window)) (declare (ignore this))))
 
 (defun update-panel-position (panel x y)
   (with-slots ((this-x x) (this-y y) bounds-updated-p) panel
@@ -188,12 +190,17 @@
         (unwind-protect
              (unless (= 0 val)
                (%nk:window-get-bounds bounds *handle*)
-               (setf (%x panel-spacing) (style :layout-spacing)
-                     (%y panel-spacing) (style :layout-spacing)
-                     width (bounds :w)
-                     height (bounds :h)
-                     x (bounds :x)
-                     y (invert-y (bounds :y) height))
+               (let ((prev-x x)
+                     (prev-y y))
+                 (setf (%x panel-spacing) (style :layout-spacing)
+                       (%y panel-spacing) (style :layout-spacing)
+                       width (bounds :w)
+                       height (bounds :h)
+                       x (bounds :x)
+                       y (invert-y (bounds :y) height))
+                 (when (or (/= x prev-x)
+                           (/= y prev-y))
+                   (on-move win)))
                (with-styles ((:window :spacing) panel-spacing
                              (:window :padding) *zero-vec2*
                              (:window :group-padding) *zero-vec2*)
