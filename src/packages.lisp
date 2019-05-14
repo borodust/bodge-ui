@@ -33,8 +33,8 @@
            add-panel
            remove-panel
            remove-all-panels
-           minimize-window
-           restore-window
+           minimize-panel
+           restore-panel
 
            name-of
            vertical-layout

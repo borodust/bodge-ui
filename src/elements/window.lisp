@@ -20,8 +20,6 @@
    (title :initarg :title :initform "")
    (hidden-p :initform nil :reader hiddenp)
    (collapsed-p :initform nil :reader minimizedp)
-   (force-collapse-p :initform nil)
-   (force-restore-p :initform nil)
    (option-mask :initarg :option-mask :initform '())
    (style :initform (make-default-style))
    (layout :initform (make-instance 'vertical-layout))
@@ -108,15 +106,14 @@
     (when hidden-p
       (setf hidden-p nil))))
 
-(defun minimize-window (window)
-  (with-slots (force-collapse-p) window
-    (unless force-collapse-p
-      (setf force-collapse-p t))))
 
-(defun restore-window (window)
-  (with-slots (force-restore-p) window
-    (unless force-restore-p
-      (setf force-restore-p t))))
+(defun minimize-panel (window)
+  (%nk:window-collapse *handle* (%panel-id-of window) %nk:+minimized+))
+
+
+(defun restore-panel (window)
+  (%nk:window-collapse *handle* (%panel-id-of window) %nk:+maximized+))
+
 
 (defun setup-window (window &key
                               (width 0)
@@ -219,20 +216,9 @@
 
 (defun compose-window (win)
   (with-slots (x y width height title option-mask layout
-               bounds bounds-updated-p
-               panel-spacing
-               force-collapse-p force-restore-p)
+               bounds bounds-updated-p panel-spacing)
       win
     (%ensure-window-dimensions win)
-    (cond
-      (force-collapse-p
-       (%nk:window-collapse *handle*
-                            (%panel-id-of win) %nk:+minimized+)
-       (setf force-collapse-p nil))
-      (force-restore-p
-       (%nk:window-collapse *handle*
-                            (%panel-id-of win) %nk:+maximized+)
-       (setf force-restore-p nil)))
     (claw:c-val ((bounds (:struct (%nk:rect))))
       (setf (bounds :x) (float x 0f0)
             (bounds :y) (float (invert-y y height) 0f0)

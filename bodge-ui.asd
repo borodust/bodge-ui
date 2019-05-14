@@ -5,7 +5,7 @@
   :author "Pavel Korolev"
   :mailto "dev@borodust.org"
   :depends-on (bodge-utilities bodge-memory bodge-math
-                          alexandria cl-muth nuklear-blob bodge-nuklear)
+                               alexandria cl-muth nuklear-blob bodge-nuklear)
   :pathname "src/"
   :serial t
   :components ((:file "packages")
