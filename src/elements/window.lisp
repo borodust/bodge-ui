@@ -108,11 +108,13 @@
 
 
 (defun minimize-panel (window)
-  (%nk:window-collapse *handle* (%panel-id-of window) %nk:+minimized+))
+  (with-ui-access (*context*)
+    (%nk:window-collapse *handle* (%panel-id-of window) %nk:+minimized+)))
 
 
 (defun restore-panel (window)
-  (%nk:window-collapse *handle* (%panel-id-of window) %nk:+maximized+))
+  (with-ui-access (*context*)
+    (%nk:window-collapse *handle* (%panel-id-of window) %nk:+maximized+)))
 
 
 (defun setup-window (window &key
