@@ -37,7 +37,7 @@
 
 (defclass custom-widget (disposable widget)
   ((id :initform (%next-custom-widget-id) :reader %id-of)
-   (root-window :initform nil :reader %root-window-of)
+   (root-panel :initform nil :reader %root-panel-of)
    (hovering-listener :initarg :on-hover :initform nil)
    (leaving-listener :initarg :on-leave :initform nil)
    (clicking-listener :initarg :on-click :initform nil)
@@ -68,7 +68,7 @@
 
 
 (defmethod render-custom-widget :around ((this custom-widget) origin width height)
-  (let ((*window* (%root-window-of this)))
+  (let ((*panel* (%root-panel-of this)))
     (call-next-method)))
 
 
@@ -101,9 +101,9 @@
                releasing-listener
                bounds
                state
-               root-window)
+               root-panel)
       this
-    (setf root-window *window*)
+    (setf root-panel *panel*)
     (claw:c-let ((ctx (:struct (%nk:context)) :from *handle*))
       (flet ((widget-hovered-p ()
                (= %nk:+true+ (%nk:input-is-mouse-hovering-rect (ctx :input) bounds)))
@@ -125,29 +125,29 @@
           (when (and (not this-hovered-p) hovered-p)
             (custom-widget-on-hover state)
             (when hovering-listener
-              (funcall hovering-listener *window*)))
+              (funcall hovering-listener *panel*)))
           (when (and this-hovered-p (not hovered-p))
             (custom-widget-on-leave state)
             (when leaving-listener
-              (funcall leaving-listener *window*)))
+              (funcall leaving-listener *panel*)))
           (when-let ((new-clicked-buttons (set-difference clicked-buttons
                                                           this-clicked-buttons)))
             (loop for button in new-clicked-buttons
                   do (custom-widget-on-click state button)
                      (when clicking-listener
-                       (funcall clicking-listener *window* :button button :allow-other-keys t))))
+                       (funcall clicking-listener *panel* :button button :allow-other-keys t))))
           (when-let ((new-pressed-buttons (set-difference pressed-buttons
                                                           this-pressed-buttons)))
             (loop for button in new-pressed-buttons
                   do (custom-widget-on-mouse-press state button)
                      (when pressing-listener
-                       (funcall pressing-listener *window* :button button :allow-other-keys t))))
+                       (funcall pressing-listener *panel* :button button :allow-other-keys t))))
           (when-let ((released-buttons (set-difference this-pressed-buttons
                                                        pressed-buttons)))
             (loop for button in released-buttons
                   do (custom-widget-on-mouse-release state button)
                      (when releasing-listener
-                       (funcall releasing-listener *window* :button button :allow-other-keys t))))
+                       (funcall releasing-listener *panel* :button button :allow-other-keys t))))
           (let ((mouse-x (ctx :input :mouse :pos :x))
                 (mouse-y (ctx :input :mouse :pos :y))
                 (prev-x (ctx :input :mouse :prev :x))

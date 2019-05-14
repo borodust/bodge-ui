@@ -34,7 +34,7 @@
               unless (eq that-radio radio)
                 do (setf (activated that-radio) nil))
         (unless (or (null on-change) (eq old-active radio))
-          (funcall on-change *window* radio))))))
+          (funcall on-change *panel* radio))))))
 
 
 (defmethod compose :around ((this radio-group))
@@ -61,4 +61,4 @@
         (setf activated-p t)
         (activate-radio this)
         (when click-listener
-          (funcall click-listener *window*))))))
+          (funcall click-listener *panel*))))))

@@ -17,4 +17,4 @@
       (unless (eq this-checked-p checked-p)
         (setf this-checked-p checked-p)
         (when click-listener
-          (funcall click-listener *window*))))))
+          (funcall click-listener *panel*))))))

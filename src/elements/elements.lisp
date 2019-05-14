@@ -81,27 +81,27 @@
 
 
 ;;;
-;;; PANEL
+;;; PANE
 ;;;
-(defclass basic-panel ()
-  ((panel-id :initform (%next-panel-id) :reader %panel-id-of)))
+(defclass basic-pane ()
+  ((pane-id :initform (%next-pane-id) :reader %pane-id-of)))
 
 
-(defclass panel (basic-panel)
+(defclass pane (basic-pane)
   ())
 
 
-(defgeneric compose-panel (element))
+(defgeneric compose-pane (element))
 
 
-(defmethod compose ((this panel))
+(defmethod compose ((this pane))
   (let ((begin-result (%nk:group-begin-titled *handle*
-                                              (%panel-id-of this)
+                                              (%pane-id-of this)
                                               ""
                                               (nk:panel-mask :no-scrollbar))))
     (unless (= begin-result 0)
       (unwind-protect
-           (compose-panel this)
+           (compose-pane this)
         (%nk:group-end *handle*)))))
 
 

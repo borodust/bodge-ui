@@ -3,7 +3,7 @@
 ;;;
 ;;;
 ;;;
-(defclass stacking-layout (expandable panel %layout) ())
+(defclass stacking-layout (expandable pane %layout) ())
 
 
 (defun default-row-height (child-height)
@@ -32,7 +32,7 @@
     (values width height)))
 
 
-(defmethod compose-panel ((this vertical-layout))
+(defmethod compose-pane ((this vertical-layout))
   (dochildren (child this)
     (multiple-value-bind (child-width child-height) (calc-bounds child)
       (let ((height (default-row-height child-height)))
@@ -101,7 +101,7 @@
     (compose child)))
 
 
-(defmethod compose-panel ((this horizontal-layout))
+(defmethod compose-pane ((this horizontal-layout))
   (flet ((height-max (value element)
            (multiple-value-bind (el-width el-height) (calc-bounds element)
              (declare (ignore el-width))

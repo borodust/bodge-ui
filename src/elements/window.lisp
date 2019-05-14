@@ -1,13 +1,13 @@
 (cl:in-package :bodge-ui)
 
-(declaim (special *window*
+(declaim (special *panel*
                   *row-height*))
 
 
 ;;;
 ;;;
 ;;;
-(defclass window (disposable named basic-panel)
+(defclass panel (disposable named basic-pane)
   ((x :initarg :x :initform 0.0)
    (y :initarg :y :initform 0.0)
    (width :initform nil)
@@ -30,19 +30,19 @@
 
 
 (defgeneric on-close (element)
-  (:method ((this window)) (declare (ignore this))))
+  (:method ((this panel)) (declare (ignore this))))
 
 
 (defgeneric on-minimize (element)
-  (:method ((this window)) (declare (ignore this))))
+  (:method ((this panel)) (declare (ignore this))))
 
 
 (defgeneric on-restore (element)
-  (:method ((this window)) (declare (ignore this))))
+  (:method ((this panel)) (declare (ignore this))))
 
 
 (defgeneric on-move (element)
-  (:method ((this window)) (declare (ignore this))))
+  (:method ((this panel)) (declare (ignore this))))
 
 
 (defun update-panel-position (panel x y)
@@ -95,29 +95,29 @@
     result-vec2))
 
 
-(defun hide-window (window)
-  (with-slots (hidden-p) window
+(defun hide-panel (panel)
+  (with-slots (hidden-p) panel
     (unless hidden-p
       (setf hidden-p t))))
 
 
-(defun show-window (window)
-  (with-slots (hidden-p) window
+(defun show-panel (panel)
+  (with-slots (hidden-p) panel
     (when hidden-p
       (setf hidden-p nil))))
 
 
-(defun minimize-panel (window)
+(defun minimize-panel (panel)
   (with-ui-access (*context*)
-    (%nk:window-collapse *handle* (%panel-id-of window) %nk:+minimized+)))
+    (%nk:window-collapse *handle* (%pane-id-of panel) %nk:+minimized+)))
 
 
-(defun restore-panel (window)
+(defun restore-panel (panel)
   (with-ui-access (*context*)
-    (%nk:window-collapse *handle* (%panel-id-of window) %nk:+maximized+)))
+    (%nk:window-collapse *handle* (%pane-id-of panel) %nk:+maximized+)))
 
 
-(defun setup-window (window &key
+(defun setup-panel (panel &key
                               (width 0)
                               (height 0)
                               (origin (vec2 0 0))
@@ -132,7 +132,7 @@
                option-mask (this-title title)
                (this-max-height max-height) (this-max-width max-width)
                (this-min-height min-height) (this-min-width min-width))
-      window
+      panel
     (setf w (float width 0f0)
           h (float height 0f0)
           this-x (x origin)
@@ -145,61 +145,61 @@
     (when background-color
       (setf background-style-item (make-instance 'color-style-item :color background-color)))
     (when hidden
-      (hide-window window))))
+      (hide-panel panel))))
 
 
-(define-destructor window (bounds panel-spacing)
+(define-destructor panel (bounds panel-spacing)
   (claw:free bounds)
   (dispose panel-spacing))
 
 
-(defmethod initialize-instance :after ((this window) &key &allow-other-keys)
-  (reinitialize-window this))
+(defmethod initialize-instance :after ((this panel) &key &allow-other-keys)
+  (reinitialize-panel this))
 
 
-(defmethod children-of ((this window))
+(defmethod children-of ((this panel))
   (with-slots (layout) this
     (children-of layout)))
 
 
-(defmethod adopt ((this window) child)
+(defmethod adopt ((this panel) child)
   (with-slots (layout) this
     (adopt layout child)))
 
 
-(defmethod abandon ((this window) child)
+(defmethod abandon ((this panel) child)
   (with-slots (layout) this
     (abandon layout child)))
 
 
-(defmethod abandon-all ((this window))
+(defmethod abandon-all ((this panel))
   (with-slots (layout) this
     (abandon-all layout)))
 
 
-(defun add-panel (ui window-class &rest initargs &key &allow-other-keys)
+(defun add-panel (ui panel-class &rest initargs &key &allow-other-keys)
   (with-ui (ui)
-    (%add-panel ui (apply #'make-instance window-class initargs))))
+    (%add-panel ui (apply #'make-instance panel-class initargs))))
 
 
-(defun remove-panel (ui window)
-  (%remove-panel ui window))
+(defun remove-panel (ui panel)
+  (%remove-panel ui panel))
 
 
 (defun remove-all-panels (ui)
   (%remove-all-panels ui))
 
 
-(defun find-element (name &optional (window *window*))
+(defun find-element (name &optional (panel *panel*))
   (labels ((%find-element (root name)
              (if (equal (name-of root) name)
                  root
                  (loop for child in (children-of root)
                     thereis (%find-element child name)))))
-    (%find-element window name)))
+    (%find-element panel name)))
 
 
-(defun %ensure-window-dimensions (win)
+(defun %ensure-panel-dimensions (win)
   (with-slots (width height
                max-width max-height
                min-width min-height
@@ -216,20 +216,20 @@
               bounds-updated-p t)))))
 
 
-(defun compose-window (win)
+(defun compose-panel (win)
   (with-slots (x y width height title option-mask layout
                bounds bounds-updated-p panel-spacing)
       win
-    (%ensure-window-dimensions win)
+    (%ensure-panel-dimensions win)
     (claw:c-val ((bounds (:struct (%nk:rect))))
       (setf (bounds :x) (float x 0f0)
             (bounds :y) (float (invert-y y height) 0f0)
             (bounds :w) (float width 0f0)
             (bounds :h) (float height 0f0))
       (when bounds-updated-p
-        (%nk:window-set-bounds *handle* (%panel-id-of win) bounds)
+        (%nk:window-set-bounds *handle* (%pane-id-of win) bounds)
         (setf bounds-updated-p nil))
-      (let ((val (%nk:begin-titled *handle* (%panel-id-of win) title bounds option-mask)))
+      (let ((val (%nk:begin-titled *handle* (%pane-id-of win) title bounds option-mask)))
         (unwind-protect
              (unless (= 0 val)
                (%nk:window-get-bounds bounds *handle*)
@@ -254,26 +254,26 @@
           (%nk:end *handle*))))))
 
 
-(defmethod compose ((this window))
+(defmethod compose ((this panel))
   (with-slots (background-style-item hidden-p redefined-p style collapsed-p
                bounds-updated-p)
       this
     (unless hidden-p
       (when redefined-p
-        (reinitialize-window this)
+        (reinitialize-panel this)
         (setf redefined-p nil
               bounds-updated-p t))
       (with-styles ((:window :fixed-background) background-style-item)
-        (let* ((*window* this)
+        (let* ((*panel* this)
                (*style* style)
                (*row-height* (style :row-height)))
-          (compose-window this)))
-      (when (or (/= %nk:+false+ (%nk:window-is-hidden *handle* (%panel-id-of this)))
-                (/= %nk:+false+ (%nk:window-is-closed *handle* (%panel-id-of this))))
+          (compose-panel this)))
+      (when (or (/= %nk:+false+ (%nk:window-is-hidden *handle* (%pane-id-of this)))
+                (/= %nk:+false+ (%nk:window-is-closed *handle* (%pane-id-of this))))
         (setf hidden-p t)
         (on-close this))
       (unless (eq (/= %nk:+false+
-                      (%nk:window-is-collapsed *handle* (%panel-id-of this)))
+                      (%nk:window-is-collapsed *handle* (%pane-id-of this)))
                   collapsed-p)
         (setf collapsed-p (not collapsed-p))
         (if collapsed-p
@@ -282,10 +282,10 @@
 
 
 (defun root-panel ()
-  *window*)
+  *panel*)
 
 
-(defmethod update-instance-for-redefined-class :after ((this window)
+(defmethod update-instance-for-redefined-class :after ((this panel)
                                                        added-slots
                                                        discarded-slots
                                                        property-list
@@ -295,12 +295,12 @@
     (setf redefined-p t)))
 
 
-(defgeneric reinitialize-window (window)
-  (:method (window) (declare (ignore window))))
+(defgeneric reinitialize-panel (panel)
+  (:method (panel) (declare (ignore panel))))
 
 
-(defun update-window-options (window &rest opts)
-  (with-slots (option-mask) window
+(defun update-panel-options (panel &rest opts)
+  (with-slots (option-mask) panel
     (flet ((to-nuklear-opts (opts)
              (let ((updated-opts (list :title :no-scrollbar :border)))
                (loop for opt in opts
@@ -318,7 +318,7 @@
 
 
 (defmacro defpanel (name-and-opts &body layout)
-  (flet ((filter-window-initargs (opts)
+  (flet ((filter-panel-initargs (opts)
            (loop with special-keywords = '(:inherit :options)
                  for (key . value) in opts
                  unless (member key special-keywords)
@@ -333,13 +333,13 @@
                             (t (list key (first value)))))))
     (destructuring-bind (name &rest opts) (ensure-list name-and-opts)
       (with-gensyms (layout-parent)
-        (let ((initargs (filter-window-initargs opts)))
+        (let ((initargs (filter-panel-initargs opts)))
           `(progn
-             (defclass ,name (window ,@(assoc-value opts :inherit)) ()
+             (defclass ,name (panel ,@(assoc-value opts :inherit)) ()
                (:default-initargs ,@initargs))
-             (defmethod reinitialize-window ((,layout-parent ,name))
-               (setup-window ,layout-parent ,@initargs)
-               (update-window-options ,layout-parent ,@(assoc-value opts :options))
+             (defmethod reinitialize-panel ((,layout-parent ,name))
+               (setup-panel ,layout-parent ,@initargs)
+               (update-panel-options ,layout-parent ,@(assoc-value opts :options))
                (abandon-all ,layout-parent)
                ,(when layout
                   `(layout (,layout-parent) ,@layout)))

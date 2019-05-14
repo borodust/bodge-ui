@@ -13,4 +13,4 @@
   (with-slots (enabled-p click-listener label) this
     (let ((return-value (%nk:option-label *handle* label (if enabled-p 1 0))))
       (unless (or (= return-value %nk:+false+) (null click-listener))
-        (funcall click-listener *window*)))))
+        (funcall click-listener *panel*)))))

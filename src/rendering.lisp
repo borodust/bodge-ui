@@ -509,7 +509,7 @@
               do (register-character-input character))
         (when-let ((scroll (next-scroll input-source (%last-scroll-of context))))
           (register-scroll-input (x scroll) (y scroll)))))
-    (loop for win in (%windows-of context)
+    (loop for win in (%panels-of context)
           do (compose win))
     (let ((*renderer* (%renderer-of context)))
       (render-ui *renderer*))))

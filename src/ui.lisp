@@ -58,9 +58,9 @@
    (last-cursor-position :initform (vec2) :reader %last-cursor-position-of)
    (last-scroll :initform (vec2) :reader %last-scroll-of)
    (nuklear-font :initarg :nuklear-font)
-   (last-window-id :initform 0)
+   (last-panel-id :initform 0)
    (last-custom-widget-id :initform 0)
-   (windows :initform nil :accessor %windows-of)
+   (panels :initform nil :accessor %panels-of)
    (custom-widget-table :initform (make-hash-table))))
 
 
@@ -85,26 +85,26 @@
                  :renderer renderer))
 
 
-(defun %add-panel (ui window)
-  (push window (%windows-of ui))
-  window)
+(defun %add-panel (ui panel)
+  (push panel (%panels-of ui))
+  panel)
 
 
-(defun %remove-panel (ui window)
-  (alexandria:deletef (%windows-of ui) window)
-  (%nk:window-close (%handle-of ui) (%panel-id-of window)))
+(defun %remove-panel (ui panel)
+  (alexandria:deletef (%panels-of ui) panel)
+  (%nk:window-close (%handle-of ui) (%pane-id-of panel)))
 
 
 (defun %remove-all-panels (ui)
   (let ((ui-handle (%handle-of ui)))
-    (dolist (window (%windows-of ui))
-      (%nk:window-close ui-handle (%panel-id-of window))))
-  (setf (%windows-of ui) nil))
+    (dolist (panel (%panels-of ui))
+      (%nk:window-close ui-handle (%pane-id-of panel))))
+  (setf (%panels-of ui) nil))
 
 
-(defun %next-panel-id ()
-  (with-slots (last-window-id) *context*
-    (format nil "~A" (incf last-window-id))))
+(defun %next-pane-id ()
+  (with-slots (last-panel-id) *context*
+    (format nil "~A" (incf last-panel-id))))
 
 
 (defun %next-custom-widget-id ()
