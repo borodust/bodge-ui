@@ -56,6 +56,11 @@
            notebook
            tab
 
+           scroll-area
+           update-area-scroll-position
+           with-area-scroll-position
+           area-scroll-position
+
            text-of
 
            deflayout

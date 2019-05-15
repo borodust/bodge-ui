@@ -17,6 +17,7 @@
                 :serial t
                 :components ((:file "elements")
                              (:file "layout")
+                             (:file "scroll-area")
                              (:file "button")
                              (:file "check-box")
                              (:file "color-box")
@@ -31,7 +32,7 @@
                              (:file "radio")
                              (:file "spacing")
                              (:file "text-edit")
-                             (:file "window")
+                             (:file "panel")
                              (:file "custom-layout")
                              (:file "custom-widget")))))
 

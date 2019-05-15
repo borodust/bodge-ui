@@ -81,15 +81,15 @@
 
 
 ;;;
-;;; PANE
+;;; BASIC PANE
 ;;;
 (defclass basic-pane ()
   ((pane-id :initform (%next-pane-id) :reader %pane-id-of)))
 
-
-(defclass pane (basic-pane)
-  ())
-
+;;;
+;;; PANE
+;;;
+(defclass pane (basic-pane) ())
 
 (defgeneric compose-pane (element))
 
@@ -103,8 +103,6 @@
       (unwind-protect
            (compose-pane this)
         (%nk:group-end *handle*)))))
-
-
 
 ;;;
 ;;; WIDGET
