@@ -1,18 +1,22 @@
 (cl:in-package :bodge-ui.example)
 
 (defpanel (demo-window
-            (:title "Hello Bodge UI")
-            (:origin 200 50)
-            (:width 400) (:height 400)
-            (:options :movable :resizable
-                      :minimizable :scrollable
-                      :closable))
-  (label :text "Nested:")
+           (:title "Hello Bodge UI")
+           (:origin 200 50)
+           (:width 400) (:height 400)
+           (:options :movable :resizable
+                     :minimizable :scrollable
+                     :closable)
+           (:style :window-padding 10
+                   :window-margin 10
+                   :window-background (vec2 10 10)))
+    (label :text "Nested:")
   (horizontal-layout
    (radio-group
     (radio :label "Option 1")
     (radio :label "Option 2" :activated t))
    (vertical-layout
+    :style '(:window-padding 10 :window-margin 10)
     (check-box :label "Check 1" :width 100)
     (check-box :label "Check 2"))
    (vertical-layout

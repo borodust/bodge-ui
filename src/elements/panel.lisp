@@ -16,15 +16,13 @@
    (max-height :initform nil :initarg :max-height)
    (min-width :initform nil :initarg :min-width)
    (min-height :initform nil :initarg :min-height)
-   (background-style-item :initform nil)
    (title :initarg :title :initform "")
    (hidden-p :initform nil :reader hiddenp)
    (collapsed-p :initform nil :reader minimizedp)
    (option-mask :initarg :option-mask :initform '())
-   (style :initform (make-default-style))
+   (style :initform nil)
    (layout :initform (make-instance 'vertical-layout))
    (bounds :initform (claw:calloc '(:struct (%nk:rect))))
-   (panel-spacing :initform (make-instance '%vec2))
    (redefined-p :initform nil)
    (bounds-updated-p :initform nil)))
 
@@ -118,23 +116,35 @@
 
 
 (defun setup-panel (panel &key
-                              (width 0)
-                              (height 0)
-                              (origin (vec2 0 0))
-                              (title "") (background-color nil)
-                              (hidden nil)
-                              max-height
-                              max-width
-                              min-height
-                              min-width
-                     &allow-other-keys)
-  (with-slots ((w width) (h height) (this-x x) (this-y y) background-style-item
+                            (width 0)
+                            (height 0)
+                            (origin (vec2 0 0))
+                            (title "") (background-color nil)
+                            (hidden nil)
+                            max-height
+                            max-width
+                            min-height
+                            min-width
+                            style
+                    &allow-other-keys)
+  (with-slots ((w width) (h height) (this-x x) (this-y y)
                option-mask (this-title title)
                (this-max-height max-height) (this-max-width max-width)
-               (this-min-height min-height) (this-min-width min-width))
+               (this-min-height min-height) (this-min-width min-width)
+               (this-style style))
       panel
     (setf w (float width 0f0)
           h (float height 0f0)
+          this-style (apply #'make-style
+                            (append style
+                                    (list :layout-spacing 4
+                                          :row-height 26
+                                          :panel-spacing (vec2 4 0)
+                                          :panel-padding (vec2 4 0)
+                                          :group-padding *zero-vec2*)
+                                    (when background-color
+                                      (list :panel-fixed-background
+                                            (make-color-style-item background-color)))))
           this-x (x origin)
           this-y (y origin)
           this-title title
@@ -142,15 +152,12 @@
           this-max-width max-width
           this-min-height min-height
           this-min-width min-width)
-    (when background-color
-      (setf background-style-item (make-instance 'color-style-item :color background-color)))
     (when hidden
       (hide-panel panel))))
 
 
-(define-destructor panel (bounds panel-spacing)
-  (claw:free bounds)
-  (dispose panel-spacing))
+(define-destructor panel (bounds)
+  (claw:free bounds))
 
 
 (defmethod initialize-instance :after ((this panel) &key &allow-other-keys)
@@ -217,9 +224,7 @@
 
 
 (defun compose-panel (win)
-  (with-slots (x y width height title option-mask layout
-               bounds bounds-updated-p panel-spacing)
-      win
+  (with-slots (x y width height title option-mask layout bounds bounds-updated-p) win
     (%ensure-panel-dimensions win)
     (claw:c-val ((bounds (:struct (%nk:rect))))
       (setf (bounds :x) (float x 0f0)
@@ -235,39 +240,36 @@
                (%nk:window-get-bounds bounds *handle*)
                (let ((prev-x x)
                      (prev-y y))
-                 (setf (%x panel-spacing) (style :layout-spacing)
-                       (%y panel-spacing) (style :layout-spacing)
-                       width (bounds :w)
+                 (setf width (bounds :w)
                        height (bounds :h)
                        x (bounds :x)
                        y (invert-y (bounds :y) height))
                  (when (or (/= x prev-x)
                            (/= y prev-y))
                    (on-move win)))
-               (with-styles ((:window :spacing) panel-spacing
-                             (:window :padding) *zero-vec2*
-                             (:window :group-padding) *zero-vec2*)
-                 (multiple-value-bind (width height) (calc-bounds layout)
-                   (declare (ignore width))
-                   (%nk:layout-row-dynamic *handle* (default-row-height height) 1)
-                   (compose layout))))
+               (multiple-value-bind (width height) (calc-bounds layout)
+                 (declare (ignore width))
+                 (%nk:layout-row-dynamic *handle* (default-row-height height) 1)
+                 (compose layout)))
           (%nk:end *handle*))))))
 
 
+(defmethod compose :around ((this panel))
+  (with-slots (style) this
+    (with-style (style)
+      (call-next-method))))
+
+
 (defmethod compose ((this panel))
-  (with-slots (background-style-item hidden-p redefined-p style collapsed-p
-               bounds-updated-p)
-      this
+  (with-slots (hidden-p redefined-p style collapsed-p bounds-updated-p) this
     (unless hidden-p
       (when redefined-p
         (reinitialize-panel this)
         (setf redefined-p nil
               bounds-updated-p t))
-      (with-styles ((:window :fixed-background) background-style-item)
-        (let* ((*panel* this)
-               (*style* style)
-               (*row-height* (style :row-height)))
-          (compose-panel this)))
+      (let* ((*panel* this)
+             (*row-height* (style :row-height)))
+        (compose-panel this))
       (when (or (/= %nk:+false+ (%nk:window-is-hidden *handle* (%pane-id-of this)))
                 (/= %nk:+false+ (%nk:window-is-closed *handle* (%pane-id-of this))))
         (setf hidden-p t)
@@ -330,6 +332,7 @@
                                               ,(or (second value) 0)
                                               ,(or (third value) 0)
                                               ,(or (fourth value) 1))))
+                            (:style (list key `(list ,@value)))
                             (t (list key (first value)))))))
     (destructuring-bind (name &rest opts) (ensure-list name-and-opts)
       (with-gensyms (layout-parent)
