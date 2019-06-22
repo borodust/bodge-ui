@@ -54,13 +54,13 @@
    (renderer :initarg :renderer :reader %renderer-of)
    (compose-tasks :initform (mt:make-guarded-reference (list)))
    (input-source :initform nil :initarg :input-source :reader %input-source-of)
-   (style-stack :initform nil)
    (last-cursor-position :initform (vec2) :reader %last-cursor-position-of)
    (last-scroll :initform (vec2) :reader %last-scroll-of)
    (nuklear-font :initarg :nuklear-font)
    (last-panel-id :initform 0)
    (last-custom-widget-id :initform 0)
    (panels :initform nil :accessor %panels-of)
+   (style :initform (make-style) :reader %style-of)
    (custom-widget-table :initform (make-hash-table))))
 
 
@@ -230,32 +230,6 @@
 ;;;
 ;;;
 ;;;
-(defclass style-item (disposable)
-  ((handle :initform (claw:alloc '(:struct (%nk:style-item))) :reader %handle-of)))
-
-
-(define-destructor style-item (handle)
-  (claw:free handle))
-
-
-(defclass color-style-item (style-item) ())
-
-
-(defun style-item-color (style-item r g b &optional (a 1f0))
-  (claw:c-with ((color-v (:struct (%nk:color))))
-    (%nk:style-item-color style-item
-                          (%nk:rgba-f color-v
-                                      (float r 0f0)
-                                      (float g 0f0)
-                                      (float b 0f0)
-                                      (float a 0f0)))))
-
-
-(defmethod initialize-instance :after ((this color-style-item)
-                                       &key color)
-  (style-item-color (%handle-of this) (x color) (y color) (z color) (w color)))
-
-
 (defclass %vec2 (disposable)
   ((handle :reader %handle-of)))
 
@@ -297,37 +271,3 @@
 (defun (setf %y) (value vec2)
   (with-vec2-accessor (val :y vec2)
     (setf val (float value 0f0))))
-
-;;;
-;;;
-;;;
-(defun push-style-popper (fu context)
-  (with-slots (style-stack) context
-    (push fu style-stack)))
-
-
-(defun pop-style (context)
-  (with-slots (style-stack) context
-    (alexandria:when-let ((pop-fu (pop style-stack)))
-      (funcall pop-fu (%handle-of context)))))
-
-
-(defgeneric push-style (context destination source))
-
-(defmethod push-style ((context nuklear-context) destination (vec %vec2))
-  (%nk:style-push-vec2 (%handle-of context) destination (%handle-of vec))
-  (push-style-popper #'%nk:style-pop-vec2 context))
-
-(defmethod push-style ((context nuklear-context) destination (value single-float))
-  (%nk:style-push-float (%handle-of context) destination value)
-  (push-style-popper #'%nk:style-pop-float context))
-
-(defmethod push-style ((context nuklear-context) destination (item style-item))
-  (%nk:style-push-style-item (%handle-of context) destination (%handle-of item))
-  (push-style-popper #'%nk:style-pop-style-item context))
-
-(defun %nopper (handle)
-  (declare (ignore handle)))
-
-(defmethod push-style ((context nuklear-context) destination (item null))
-  (push-style-popper #'%nopper context))

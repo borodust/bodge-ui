@@ -2,8 +2,8 @@
 
 (defvar *radio-group* nil)
 
-(defvar *zero-vec2* (make-instance '%vec2 :x 0f0 :y 0f0))
-(defvar *one-vec2* (make-instance '%vec2 :x 1f0 :y 1f0))
+(defvar *zero-vec2* (vec2 0 0))
+(defvar *one-vec2* (vec2 1 1))
 (defvar *nk-buttons* (list %nk:+button-left+ :left
                            %nk:+button-right+ :right
                            %nk:+button-middle+ :middle))
@@ -16,6 +16,26 @@
 
 (defclass named ()
   ((name :initarg :name :initform nil :reader name-of)))
+
+
+;;;
+;;; STYLED
+;;;
+(defclass styled ()
+  ((style :initform nil)))
+
+
+(defmethod initialize-instance :after ((this styled) &key style)
+  (with-slots ((this-style style)) this
+    (setf this-style (apply #'make-style style))))
+
+
+(defmethod compose :around ((this styled))
+  (with-slots (style) this
+    (if style
+        (with-style (style)
+          (call-next-method))
+        (call-next-method))))
 
 ;;;
 ;;; LAYOUT
@@ -49,7 +69,7 @@
    (expandable-p :initform t :initarg :expandable :reader expandablep)))
 
 
-(defclass %layout (named parent) ())
+(defclass %layout (named styled parent) ())
 
 
 (defmethod compose ((this %layout))
@@ -59,25 +79,6 @@
 
 (defun make-container-layout ()
   (make-instance '%layout))
-
-
-(defmacro with-style (((&rest path) value) &body body)
-  (with-gensyms (ctx)
-    `(claw:c-let ((,ctx (:struct (%nk:context)) :from (%handle-of *context*)))
-       (push-style *context* (,ctx :style ,@path &) ,value)
-       (unwind-protect
-            (progn ,@body)
-         (pop-style *context*)))))
-
-
-(defmacro with-styles ((&rest styles) &body body)
-  (labels ((expand-next (rest-styles)
-             (if-let ((path (first rest-styles))
-                                 (value (second rest-styles)))
-               `(with-style ((,@path) ,value)
-                  ,(expand-next (cddr rest-styles)))
-               `(progn ,@body))))
-    (expand-next styles)))
 
 
 ;;;
@@ -111,7 +112,7 @@
 (defgeneric show-widget (widget))
 
 
-(defclass widget (named expandable)
+(defclass widget (named styled expandable)
   ((hidden :initform nil :reader hiddenp)
    (width :initform nil :initarg :width :reader width-of)
    (height :initform nil :initarg :height :reader height-of)))

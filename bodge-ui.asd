@@ -9,6 +9,7 @@
   :pathname "src/"
   :serial t
   :components ((:file "packages")
+               (:file "utils")
                (:file "ui")
                (:file "style")
                (:file "input-source")

@@ -5,15 +5,9 @@
                   *renderer*))
 
 
-(defun clamp (r g b a)
-  (flet ((c (v)
-           (min (max (/ v 255.0) 0.0) 1.0)))
-    (vec4 (c r) (c g) (c b) (c a))))
-
-
 (defun bodge-color (nk-color)
   (claw:c-val ((nk-color (:struct (%nk:color))))
-    (clamp (nk-color :r) (nk-color :g) (nk-color :b) (nk-color :a))))
+    (clamp-vec4 (nk-color :r) (nk-color :g) (nk-color :b) (nk-color :a))))
 
 
 (definline %invert (y &optional (h 0.0))
@@ -509,7 +503,8 @@
               do (register-character-input character))
         (when-let ((scroll (next-scroll input-source (%last-scroll-of context))))
           (register-scroll-input (x scroll) (y scroll)))))
-    (loop for win in (%panels-of context)
-          do (compose win))
+    (let ((*style* (%style-of context)))
+     (loop for win in (%panels-of context)
+           do (compose win)))
     (let ((*renderer* (%renderer-of context)))
       (render-ui *renderer*))))
