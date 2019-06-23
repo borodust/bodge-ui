@@ -1,7 +1,6 @@
 (cl:in-package :bodge-ui)
 
-(declaim (special *panel*
-                  *row-height*))
+(declaim (special *panel*))
 
 
 ;;;
@@ -240,11 +239,11 @@
                  (when (or (/= x prev-x)
                            (/= y prev-y))
                    (on-move win)))
-               (multiple-value-bind (width height) (calc-bounds win)
-                 (declare (ignore width))
-                 (%nk:layout-row-dynamic *handle* (default-row-height height) 1)
-                 (loop for child in (children-of win)
-                       do (compose child))))
+               (loop for child in (children-of win)
+                     do (multiple-value-bind (width height) (calc-bounds child)
+                          (declare (ignore width))
+                          (%nk:layout-row-dynamic *handle* (default-row-height height) 1)
+                          (compose child))))
           (%nk:end *handle*))))))
 
 
@@ -255,8 +254,7 @@
         (reinitialize-panel this)
         (setf redefined-p nil
               bounds-updated-p t))
-      (let* ((*panel* this)
-             (*row-height* (style :row-height)))
+      (let* ((*panel* this))
         (compose-panel this))
       (when (or (/= %nk:+false+ (%nk:window-is-hidden *handle* (%pane-id-of this)))
                 (/= %nk:+false+ (%nk:window-is-closed *handle* (%pane-id-of this))))
