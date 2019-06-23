@@ -354,6 +354,6 @@
 ;;;
 ;;; Groups
 ;;;
-(define-float-style group-border :window :border)
-(define-vec2-style group-padding :window :group-padding)
-(define-color-style group-border-color :window :group-border-color)
+(define-float-style panel-group-border :window :border)
+(define-vec2-style panel-group-padding :window :group-padding)
+(define-color-style panel-group-border-color :window :group-border-color)

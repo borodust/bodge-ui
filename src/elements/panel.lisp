@@ -143,7 +143,7 @@
                                           :row-height 26
                                           :panel-spacing (vec2 4 0)
                                           :panel-padding (vec2 4 0)
-                                          :group-padding *zero-vec2*)
+                                          :panel-group-padding *zero-vec2*)
                                     (when background-color
                                       (list :panel-fixed-background
                                             (make-color-style-item background-color)))))
