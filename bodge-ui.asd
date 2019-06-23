@@ -17,6 +17,7 @@
                (:module elements
                 :serial t
                 :components ((:file "elements")
+                             (:file "style")
                              (:file "layout")
                              (:file "scroll-area")
                              (:file "button")

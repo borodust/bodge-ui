@@ -56,6 +56,8 @@
            notebook
            tab
 
+           styled-group
+
            scroll-area
            update-area-scroll-position
            with-area-scroll-position

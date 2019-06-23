@@ -7,7 +7,7 @@
 ;;;
 ;;;
 ;;;
-(defclass panel (disposable named basic-pane)
+(defclass panel (disposable named basic-pane parent)
   ((x :initarg :x :initform 0.0)
    (y :initarg :y :initform 0.0)
    (width :initform nil)
@@ -21,7 +21,6 @@
    (collapsed-p :initform nil :reader minimizedp)
    (option-mask :initarg :option-mask :initform '())
    (style :initform nil)
-   (layout :initform (make-instance 'vertical-layout))
    (bounds :initform (claw:calloc '(:struct (%nk:rect))))
    (redefined-p :initform nil)
    (bounds-updated-p :initform nil)))
@@ -136,7 +135,11 @@
     (setf w (float width 0f0)
           h (float height 0f0)
           this-style (apply #'make-style
-                            (append style
+                            (append (loop for (name value) on style by #'cddr
+                                          if (eq name :from)
+                                            append value
+                                          else
+                                            append (list name value))
                                     (list :layout-spacing 4
                                           :row-height 26
                                           :panel-spacing (vec2 4 0)
@@ -162,26 +165,6 @@
 
 (defmethod initialize-instance :after ((this panel) &key &allow-other-keys)
   (reinitialize-panel this))
-
-
-(defmethod children-of ((this panel))
-  (with-slots (layout) this
-    (children-of layout)))
-
-
-(defmethod adopt ((this panel) child)
-  (with-slots (layout) this
-    (adopt layout child)))
-
-
-(defmethod abandon ((this panel) child)
-  (with-slots (layout) this
-    (abandon layout child)))
-
-
-(defmethod abandon-all ((this panel))
-  (with-slots (layout) this
-    (abandon-all layout)))
 
 
 (defun add-panel (ui panel-class &rest initargs &key &allow-other-keys)
@@ -223,8 +206,18 @@
               bounds-updated-p t)))))
 
 
+(defmethod calc-bounds ((this panel))
+  (calc-vertical-bounds this))
+
+
+(defmethod compose :around ((this panel))
+  (with-slots (style) this
+    (with-style (style)
+      (call-next-method))))
+
+
 (defun compose-panel (win)
-  (with-slots (x y width height title option-mask layout bounds bounds-updated-p) win
+  (with-slots (x y width height title option-mask bounds bounds-updated-p) win
     (%ensure-panel-dimensions win)
     (claw:c-val ((bounds (:struct (%nk:rect))))
       (setf (bounds :x) (float x 0f0)
@@ -247,17 +240,12 @@
                  (when (or (/= x prev-x)
                            (/= y prev-y))
                    (on-move win)))
-               (multiple-value-bind (width height) (calc-bounds layout)
+               (multiple-value-bind (width height) (calc-bounds win)
                  (declare (ignore width))
                  (%nk:layout-row-dynamic *handle* (default-row-height height) 1)
-                 (compose layout)))
+                 (loop for child in (children-of win)
+                       do (compose child))))
           (%nk:end *handle*))))))
-
-
-(defmethod compose :around ((this panel))
-  (with-slots (style) this
-    (with-style (style)
-      (call-next-method))))
 
 
 (defmethod compose ((this panel))

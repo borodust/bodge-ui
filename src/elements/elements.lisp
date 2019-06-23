@@ -187,3 +187,22 @@
 (defmethod compose ((this behavior-element))
   (with-slots (delegate) this
     (compose delegate)))
+
+
+(defun calc-vertical-bounds (this)
+  (let (width
+        height
+        (spacing (style :layout-spacing)))
+    (dochildren (child this)
+      (multiple-value-bind (child-width child-height) (calc-bounds child)
+        (when child-width
+          (setf width (+ (if width
+                             (max width child-width)
+                             child-width)
+                         spacing)))
+        (let ((child-height (default-row-height child-height)))
+          (setf height (+ (if height
+                              (+ height child-height)
+                              child-height)
+                          spacing)))))
+    (values width height)))

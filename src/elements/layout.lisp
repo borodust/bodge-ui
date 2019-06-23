@@ -14,22 +14,7 @@
 
 
 (defmethod calc-bounds ((this vertical-layout))
-  (let (width
-        height
-        (spacing (style :layout-spacing)))
-    (dochildren (child this)
-      (multiple-value-bind (child-width child-height) (calc-bounds child)
-        (when child-width
-          (setf width (+ (if width
-                             (max width child-width)
-                             child-width)
-                         spacing)))
-        (let ((child-height (default-row-height child-height)))
-          (setf height (+ (if height
-                              (+ height child-height)
-                              child-height)
-                          spacing)))))
-    (values width height)))
+  (calc-vertical-bounds this))
 
 
 (defmethod compose-pane ((this vertical-layout))
