@@ -141,8 +141,8 @@
                                             append (list name value))
                                     (list :layout-spacing 4
                                           :row-height 26
-                                          :panel-spacing (vec2 4 0)
-                                          :panel-padding (vec2 4 0)
+                                          :panel-spacing (vec2 4 4)
+                                          :panel-padding (vec2 2 2)
                                           :panel-group-padding *zero-vec2*)
                                     (when background-color
                                       (list :panel-fixed-background
