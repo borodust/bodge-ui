@@ -19,18 +19,19 @@
 
 (defmethod initialize-instance :after ((this nuklear-renderer) &key)
   (with-slots (font handle) this
-    (setf font (make-instance 'nuklear-renderer-font :handle (nk:renderer-font handle)))))
+    (setf font (make-instance 'nuklear-renderer-font
+                              :handle (nk-renderer:renderer-font handle)))))
 
 
 (defun make-nuklear-renderer (width height &optional (pixel-ratio 1f0))
-  (make-instance 'nuklear-renderer :handle (nuklear:make-renderer)
+  (make-instance 'nuklear-renderer :handle (nuklear-renderer:make-renderer)
                                    :width width
                                    :height height
                                    :pixel-ratio (or pixel-ratio 1f0)))
 
 
 (defun destroy-nuklear-renderer (renderer)
-  (nuklear:destroy-renderer (%handle-of renderer)))
+  (nuklear-renderer:destroy-renderer (%handle-of renderer)))
 
 
 (defmethod calculate-text-width ((font nuklear-renderer-font) string)
@@ -54,5 +55,6 @@
     (claw:c-let ((nk-context (:struct (%nk:context)) :from bodge-ui::*handle*))
       (let ((default-font (nk-context :style :font)))
         (unwind-protect
-             (nk:render-nuklear (%handle-of renderer) nk-context width height pixel-ratio)
+             (nk-renderer:render-nuklear (%handle-of renderer)
+                                         nk-context width height pixel-ratio)
           (%nk:style-set-font nk-context default-font))))))

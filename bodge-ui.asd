@@ -45,7 +45,9 @@
   :license "MIT"
   :author "Pavel Korolev"
   :mailto "dev@borodust.org"
-  :depends-on (bodge-glad glad-blob nuklear-blob bodge-nuklear bodge-ui cl-opengl)
+  :depends-on (bodge-glad glad-blob
+                          nuklear-renderer-blob bodge-nuklear-renderer
+                          bodge-ui cl-opengl)
   :pathname "renderer/"
   :serial t
   :components ((:file "renderer")))

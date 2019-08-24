@@ -206,13 +206,15 @@ But, lets get back to the task at hand. Here's our first window descriptor:
               (:width 400) (:height 400)
               (:options :movable :resizable
                         :minimizable :scrollable
-                        :closable))
+                        :closable)
+              (:style :panel-padding (bodge-math:vec2 10 10)))
     (label :text "Nested:")
     (horizontal-layout
      (radio-group
       (radio :label "Option 1")
       (radio :label "Option 2" :activated t))
      (vertical-layout
+      :style `(:panel-padding ,(bodge-math:vec2 10 10))
       (check-box :label "Check 1" :width 100)
       (check-box :label "Check 2"))
      (vertical-layout
