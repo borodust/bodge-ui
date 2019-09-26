@@ -5,8 +5,16 @@
                   *renderer*))
 
 
+(defgeneric compose (element))
+
+
+(defgeneric render-custom-widget (widget origin width height)
+  (:method (widget origin width height)
+    (declare (ignore widget origin width height))))
+
+
 (defun bodge-color (nk-color)
-  (claw:c-val ((nk-color (:struct (%nk:color))))
+  (c-val ((nk-color (:struct %nk:color)))
     (clamp-vec4 (nk-color :r) (nk-color :g) (nk-color :b) (nk-color :a))))
 
 
@@ -15,7 +23,7 @@
 
 
 (defmacro as-command ((cmd-var type) &body body)
-  `(claw:c-let ((,cmd-var (:struct (,type)) :from *command*))
+  `(c-let ((,cmd-var (:struct ,type) :from *command*))
      ,@body))
 
 
@@ -113,7 +121,7 @@
 
 (defun rect-stroke-color ()
   (as-command (cmd %nk:command-rect)
-    (bodge-color (cmd :color))))
+    (bodge-color (cmd :color &))))
 
 
 (defun rect-stroke-thickness ()
@@ -143,7 +151,7 @@
 
 (defun filled-rect-color ()
   (as-command (cmd %nk:command-rect-filled)
-    (bodge-color (cmd :color))))
+    (bodge-color (cmd :color &))))
 
 
 (defun filled-rect-rounding ()
@@ -240,7 +248,7 @@
 
 (defun filled-ellipse-color ()
   (as-command (cmd %nk:command-circle-filled)
-    (bodge-color (cmd :color))))
+    (bodge-color (cmd :color &))))
 
 
 (defun arc-origin ()
@@ -340,7 +348,7 @@
 
 (defun filled-triangle-color ()
   (as-command (cmd %nk:command-triangle-filled)
-    (bodge-color (cmd :color))))
+    (bodge-color (cmd :color &))))
 
 
 (defun polygon-vertices ()
@@ -398,7 +406,7 @@
 
 (defun text-foreground-color ()
   (as-command (cmd %nk:command-text)
-    (bodge-color (cmd :foreground))))
+    (bodge-color (cmd :foreground &))))
 
 
 (defun text-box-width ()
@@ -453,7 +461,7 @@
 
 (defun %custom-widget-instance ()
   (as-command (cmd %nk:command-custom)
-    (let ((widget-id (cffi:pointer-address (cmd :callback-data :ptr))))
+    (let ((widget-id (cmd :callback-data :id)))
       (context-custom-widget widget-id))))
 
 
@@ -467,7 +475,7 @@
 
 (defun command-type ()
   (as-command (cmd %nk:command)
-    (claw:enum-key '(:enum (%nk:command-type)) (cmd :type))))
+    (cmd :type)))
 
 
 (defmacro docommands (() &body body)

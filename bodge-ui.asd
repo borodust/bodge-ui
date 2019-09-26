@@ -4,8 +4,9 @@
   :license "MIT"
   :author "Pavel Korolev"
   :mailto "dev@borodust.org"
-  :depends-on (bodge-utilities bodge-memory bodge-math
-                               alexandria cl-muth nuklear-blob bodge-nuklear)
+  :depends-on (:bodge-utilities :bodge-memory :bodge-math :cffi :cffi-c-ref
+                                :bodge-libc-essentials :float-features
+                                :alexandria :cl-muth :nuklear-blob :bodge-nuklear)
   :pathname "src/"
   :serial t
   :components ((:file "packages")

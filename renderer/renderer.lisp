@@ -1,5 +1,5 @@
 (bodge-util:define-package :bodge-ui.renderer
-    (:use :cl :bodge-ui)
+    (:use :cl :bodge-ui :cffi-c-ref)
   (:export #:make-nuklear-renderer
            #:destroy-nuklear-renderer))
 (cl:in-package :bodge-ui.renderer)
@@ -52,9 +52,10 @@
 
 (defmethod render-ui ((renderer nuklear-renderer))
   (with-slots (width height pixel-ratio handle) renderer
-    (claw:c-let ((nk-context (:struct (%nk:context)) :from bodge-ui::*handle*))
+    (c-let ((nk-context (:struct %nk:context) :from bodge-ui::*handle*))
       (let ((default-font (nk-context :style :font)))
         (unwind-protect
              (nk-renderer:render-nuklear (%handle-of renderer)
-                                         nk-context width height pixel-ratio)
-          (%nk:style-set-font nk-context default-font))))))
+                                         (nk-context &)
+                                         width height pixel-ratio)
+          (%nk:style-set-font (nk-context &) default-font))))))

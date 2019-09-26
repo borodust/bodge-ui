@@ -4,7 +4,7 @@
 ;;;
 ;;;
 (defclass text-edit (disposable widget)
-  ((buffer :initform (claw:calloc '(:struct (%nk:text-edit))))))
+  ((buffer :initform (cffi:foreign-alloc '(:struct %nk:text-edit)))))
 
 
 (defmethod initialize-instance :after ((this text-edit) &key)
@@ -13,7 +13,7 @@
 
 
 (define-destructor text-edit (buffer)
-  (claw:free buffer))
+  (cffi:foreign-free buffer))
 
 
 (defun make-text-edit (&key name)
@@ -22,7 +22,7 @@
 
 (defmethod text-of ((this text-edit))
   (with-slots (buffer) this
-    (claw:c-let ((buf (:struct (%nk:text-edit)) :from buffer))
+    (c-let ((buf (:struct %nk:text-edit) :from buffer))
       (let* ((str-info (buf :string))
              (len (%nk:str-len-char str-info)))
         (if-let ((ptr (%nk:str-get-const str-info)))
@@ -33,7 +33,7 @@
 
 (defmethod (setf text-of) ((value string) (this text-edit))
   (with-slots (buffer) this
-    (claw:c-let ((buf (:struct (%nk:text-edit)) :from buffer))
+    (c-let ((buf (:struct %nk:text-edit) :from buffer))
       (let ((str-info (buf :string)))
         (%nk:str-clear str-info)
         (unless (alexandria:emptyp value)
@@ -44,5 +44,7 @@
 
 (defmethod compose ((this text-edit))
   (with-slots (buffer) this
-    (%nk:edit-buffer *handle* %nk:+edit-simple+ buffer
-                     (claw:foreign-function-pointer '%nk:filter-default))))
+    (%nk:edit-buffer *handle*
+                     (cffi:foreign-enum-value '%nuklear:edit-types :simple)
+                     buffer
+                     (cffi:foreign-symbol-pointer "nk_filter_default"))))

@@ -80,11 +80,11 @@
 ;; Nuklear Style Item
 ;;
 (defclass style-item (disposable)
-  ((handle :initform (claw:alloc '(:struct (%nk:style-item))) :reader %handle-of)))
+  ((handle :initform (cffi:foreign-alloc '(:struct %nk:style-item)) :reader %handle-of)))
 
 
 (define-destructor style-item (handle)
-  (claw:free handle))
+  (cffi:foreign-free handle))
 
 
 (defclass color-style-item (style-item) ())
@@ -93,9 +93,9 @@
 (defmethod initialize-instance :after ((this color-style-item)
                                        &key color)
   (with-slots (handle) this
-    (claw:c-with ((color-v (:struct (%nk:color))))
+    (c-with ((color-v (:struct %nk:color)))
       (%nk:style-item-color handle
-                            (%nk:rgba-f color-v
+                            (%nk:rgba-f (color-v &)
                                         (float (x color) 0f0)
                                         (float (y color) 0f0)
                                         (float (z color) 0f0)
@@ -107,10 +107,10 @@
 
 
 (defun nk->style-item (style-item)
-  (claw:c-val ((style-item (:struct (%nk:style-item))))
-    (switch ((style-item :type) :test #'=)
-      (%nk:+style-item-color+
-       (claw:c-let ((nk-color (:struct (%nk:color)) :from (style-item :data)))
+  (c-val ((style-item (:struct %nk:style-item)))
+    (switch ((style-item :type) :test #'eq)
+      (:color
+       (c-let ((nk-color (:struct %nk:color) :from (style-item :data &)))
          (make-color-style-item (clamp-vec4 (nk-color :r)
                                             (nk-color :g)
                                             (nk-color :b)
@@ -119,7 +119,8 @@
 
 
 (defun style-item->nk (style-item dest-ptr)
-  (claw:memcpy dest-ptr (%handle-of style-item) 1 '(:struct (%nk:style-item))))
+  (%libc.es:memcpy dest-ptr (%handle-of style-item) (cffi:foreign-type-size
+                                                     '(:struct %nk:style-item))))
 
 
 
@@ -127,8 +128,8 @@
 ;; Nuklear Styles
 ;;
 (defmacro with-nk-style ((nk-style) &body body)
-  `(claw:c-let ((,nk-style (:struct (%nk:style))
-                           :from (claw:c-ref *handle* (:struct (%nk:context)) :style)))
+  `(c-let ((,nk-style (:struct %nk:style)
+                      :from (c-ref *handle* (:struct %nk:context) :style &)))
      ,@body))
 
 
@@ -214,13 +215,13 @@
          (defmethod style ((,style (eql ,style-name)))
            (declare (ignore ,style))
            (with-nk-style (,nk-style)
-             (nk->style-item (,nk-style ,@path))))
+             (nk->style-item (,nk-style ,@path &))))
          (defmethod (setf style) ((,new-value vec4) (,style (eql ,style-name)))
            (setf (style ,style) (make-color-style-item ,new-value)))
          (defmethod (setf style) ((,new-value style-item) (,style (eql ,style-name)))
            (declare (ignore ,style))
            (with-nk-style (,nk-style)
-             (style-item->nk ,new-value (,nk-style ,@path))
+             (style-item->nk ,new-value (,nk-style ,@path &))
              ,new-value))))))
 
 ;;;

@@ -123,7 +123,7 @@
 
 
 (defun find-custom-widget-from-command (command &optional (ui *context*))
-  (claw:c-val ((command (:struct (%nk:command-custom))))
+  (c-val ((command (:struct %nk:command-custom)))
     (context-custom-widget (cffi:pointer-address (command :callback-data :ptr)) ui)))
 
 
@@ -177,10 +177,10 @@
 
 
 (defun register-scroll-input (x y)
-  (claw:c-with ((vec (:struct (%nk:vec2))))
+  (c-with ((vec (:struct %nk:vec2)))
     (setf (vec :x) (float x 0f0)
           (vec :y) (- (float y 0f0)))
-    (%nk:input-scroll *handle* vec)))
+    (%nk:input-scroll *handle* (vec &))))
 
 
 (defun button-state->nk (state)
@@ -191,22 +191,22 @@
 
 (defvar *nk-key-map*
   (alexandria:plist-hash-table
-   (list :left-shift %nk:+key-shift+
-         :right-shift %nk:+key-shift+
-         :left-control %nk:+key-ctrl+
-         :right-control %nk:+key-ctrl+
-         :delete %nk:+key-del+
-         :enter %nk:+key-enter+
-         :tab %nk:+key-tab+
-         :backspace %nk:+key-backspace+
-         :up %nk:+key-up+
-         :down %nk:+key-down+
-         :left %nk:+key-left+
-         :right %nk:+key-right+)))
+   (list :left-shift :shift
+         :right-shift :shift
+         :left-control :ctrl
+         :right-control :ctrl
+         :delete :del
+         :enter :enter
+         :tab :tab
+         :backspace :backspace
+         :up :up
+         :down :down
+         :left :left
+         :right :right)))
 
 
 (defun key->nk (key)
-  (gethash key *nk-key-map* %nk:+key-none+))
+  (gethash key *nk-key-map* :none))
 
 
 (defun register-keyboard-input (key state)
@@ -218,12 +218,8 @@
 
 
 (defun register-mouse-input (x y button state)
-  (let ((nk-button (ecase button
-                     (:left %nk:+button-left+)
-                     (:middle %nk:+button-middle+)
-                     (:right %nk:+button-right+)))
-        (nk-state (button-state->nk state)))
-    (%nk:input-button *handle* nk-button
+  (let ((nk-state (button-state->nk state)))
+    (%nk:input-button *handle* button
                       (floor x) (floor (- (renderer-canvas-height (%renderer-of *context*)) y))
                       nk-state)))
 
@@ -235,20 +231,20 @@
 
 
 (define-destructor %vec2 (handle)
-  (claw:free handle))
+  (cffi:foreign-free handle))
 
 
 (defmethod initialize-instance :after ((this %vec2) &key (x 0f0) (y 0f0))
   (with-slots (handle) this
-    (claw:c-let ((vec (:struct (%nk:vec2))))
+    (c-let ((vec (:struct %nk:vec2) :alloc t))
       (setf (vec :x) (float x 0f0)
             (vec :y) (float y 0f0)
-            handle vec))))
+            handle (vec &)))))
 
 
 (defmacro with-vec2-accessor ((value accessor %vec2) &body body)
   (alexandria:with-gensyms (vec)
-    `(claw:c-with ((,vec (:struct (%nk:vec2)) :from (%handle-of ,%vec2)))
+    `(c-let ((,vec (:struct %nk:vec2) :from (%handle-of ,%vec2)))
        (symbol-macrolet ((,value (,vec ,accessor)))
          ,@body))))
 

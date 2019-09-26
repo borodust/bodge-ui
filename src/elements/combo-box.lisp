@@ -13,15 +13,15 @@
 
 
 (define-destructor combo-box (foreign-array count)
-  (claw:c-let ((array-ptr :pointer :ptr foreign-array))
+  (c-let ((array-ptr :pointer :from foreign-array))
     (loop for i from 0 below count
           do (cffi:foreign-string-free (array-ptr i)))
-    (claw:free array-ptr)))
+    (cffi:foreign-free array-ptr)))
 
 
 (defmethod initialize-instance :after ((this combo-box) &key)
   (with-slots (values foreign-array count drop-height drop-width) this
-    (claw:c-let ((array-ptr :pointer :count (length values)))
+    (c-let ((array-ptr :pointer :alloc t :count (length values)))
       (loop with max-width = 0
             for value in values
             for i from 0
@@ -36,10 +36,15 @@
 
 (defmethod compose ((this combo-box))
   (with-slots (foreign-array count selected drop-width drop-height) this
-    (claw:c-with ((size (:struct (%nk:vec2))))
+    (c-with ((size (:struct %nk:vec2)))
       (setf (size :x) drop-width
             (size :y) (float (or drop-height (* count (+ *row-height* 8))) 0f0))
       (let ((new-value
-              (%nk:combo *handle* foreign-array count selected (floor *row-height*) size)))
+              (%nk:combo *handle*
+                         foreign-array
+                         count
+                         selected
+                         (floor *row-height*)
+                         (size &))))
         (unless (= new-value selected)
           (setf selected new-value))))))

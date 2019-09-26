@@ -4,12 +4,12 @@
 ;;; SCROLL AREA
 ;;;
 (defclass scroll-area (disposable basic-pane widget)
-  ((nk-scroll :initform (claw:calloc '(:struct (%nk:scroll))))
+  ((nk-scroll :initform (cffi:foreign-alloc '(:struct %nk:scroll)))
    (layout :initform (make-instance 'vertical-layout))))
 
 
 (define-destructor scroll-area (nk-scroll)
-  (claw:free nk-scroll))
+  (cffi:foreign-free nk-scroll))
 
 
 (defmethod children-of ((this scroll-area))
@@ -46,7 +46,7 @@
 
 (defun update-area-scroll-position (pane x y)
   (with-slots (nk-scroll) pane
-    (claw:c-let ((scroll (:struct (%nk:scroll)) :from nk-scroll))
+    (c-let ((scroll (:struct %nk:scroll) :from nk-scroll))
       (setf (scroll :x) (round x)
             (scroll :y) (round y)))
     (values)))
@@ -54,7 +54,7 @@
 
 (defun %area-scroll-position (pane)
   (with-slots (nk-scroll) pane
-    (claw:c-let ((scroll (:struct (%nk:scroll)) :from nk-scroll))
+    (c-let ((scroll (:struct %nk:scroll) :from nk-scroll))
       (values (scroll :x) (scroll :y)))))
 
 

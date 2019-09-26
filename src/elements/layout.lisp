@@ -6,10 +6,6 @@
 (defclass stacking-layout (expandable pane %layout) ())
 
 
-(defun default-row-height (child-height)
-  (float (or child-height (style :row-height)) 0f0))
-
-
 (defclass vertical-layout (stacking-layout) ())
 
 
@@ -59,7 +55,7 @@
 
 (defun compose-horizontal-expand (this height expand-range child-count)
   (let ((normalizing-expand-multiplier (float (/ 1 (if (= expand-range 0) 1 expand-range)) 0f0)))
-    (%nk:layout-row-begin *handle* %nk:+dynamic+ height child-count)
+    (%nk:layout-row-begin *handle* :dynamic height child-count)
     (unwind-protect
          (dochildren (child this)
            (let ((expand-ratio (expand-ratio-of child)))
@@ -80,7 +76,7 @@
                (%nk:layout-row-template-push-variable *handle* (float width 0f0))
                (%nk:layout-row-template-push-static *handle* (float width 0f0)))
            (%nk:layout-row-template-push-dynamic *handle*)))
-    (claw:with-float-traps-masked ()
+    (float-features:with-float-traps-masked t
       (%nk:layout-row-template-end *handle*)))
   (dochildren (child this)
     (compose child)))

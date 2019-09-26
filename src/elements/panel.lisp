@@ -1,8 +1,5 @@
 (cl:in-package :bodge-ui)
 
-(declaim (special *panel*))
-
-
 ;;;
 ;;;
 ;;;
@@ -20,7 +17,7 @@
    (collapsed-p :initform nil :reader minimizedp)
    (option-mask :initarg :option-mask :initform '())
    (style :initform nil)
-   (bounds :initform (claw:calloc '(:struct (%nk:rect))))
+   (bounds :initform (cffi:foreign-alloc '(:struct %nk:rect)))
    (redefined-p :initform nil)
    (bounds-updated-p :initform nil)))
 
@@ -105,12 +102,12 @@
 
 (defun minimize-panel (panel)
   (with-ui-access (*context*)
-    (%nk:window-collapse *handle* (%pane-id-of panel) %nk:+minimized+)))
+    (%nk:window-collapse *handle* (%pane-id-of panel) :minimized)))
 
 
 (defun restore-panel (panel)
   (with-ui-access (*context*)
-    (%nk:window-collapse *handle* (%pane-id-of panel) %nk:+maximized+)))
+    (%nk:window-collapse *handle* (%pane-id-of panel) :maximized)))
 
 
 (defun setup-panel (panel &key
@@ -159,7 +156,7 @@
 
 
 (define-destructor panel (bounds)
-  (claw:free bounds))
+  (cffi:foreign-free bounds))
 
 
 (defmethod initialize-instance :after ((this panel) &key &allow-other-keys)
@@ -218,18 +215,22 @@
 (defun compose-panel (win)
   (with-slots (x y width height title option-mask bounds bounds-updated-p) win
     (%ensure-panel-dimensions win)
-    (claw:c-val ((bounds (:struct (%nk:rect))))
+    (c-val ((bounds (:struct %nk:rect)))
       (setf (bounds :x) (float x 0f0)
             (bounds :y) (float (invert-y y height) 0f0)
             (bounds :w) (float width 0f0)
             (bounds :h) (float height 0f0))
       (when bounds-updated-p
-        (%nk:window-set-bounds *handle* (%pane-id-of win) bounds)
+        (%nk:window-set-bounds *handle* (%pane-id-of win) (bounds &))
         (setf bounds-updated-p nil))
-      (let ((val (%nk:begin-titled *handle* (%pane-id-of win) title bounds option-mask)))
+      (let ((val (%nk:begin-titled *handle*
+                                   (%pane-id-of win)
+                                   title
+                                   (bounds &)
+                                   option-mask)))
         (unwind-protect
              (unless (= 0 val)
-               (%nk:window-get-bounds bounds *handle*)
+               (%nk:window-get-bounds (bounds &) *handle*)
                (let ((prev-x x)
                      (prev-y y))
                  (setf width (bounds :w)

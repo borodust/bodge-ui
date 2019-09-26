@@ -11,13 +11,13 @@
 
 (defmethod compose ((this color-box))
   (with-slots (height (this-color color) label) this
-    (claw:c-with ((size (:struct (%nk:vec2))))
+    (c-with ((size (:struct %nk:vec2)))
       (setf (size :x) (%nk:widget-width *handle*)
             (size :y) (float height 0f0))
       (flet ((combo-begin ()
                (cond
                  (this-color
-                  (claw:c-with ((color (:struct (%nk:colorf))))
+                  (c-with ((color (:struct %nk:colorf)))
                     (setf (color :r) (x this-color)
                           (color :g) (y this-color)
                           (color :b) (z this-color)

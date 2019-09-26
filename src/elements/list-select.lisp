@@ -9,19 +9,19 @@
 
 (defclass list-select-text-item (disposable)
   ((text :initarg :text :reader item-name-of)
-   (status-buf :initform (claw:calloc :int) :reader item-status)))
+   (status-buf :initform (cffi:foreign-alloc :int) :reader item-status)))
 
 
 (define-destructor list-select-text-item (status-buf)
-  (claw:free status-buf))
+  (cffi:foreign-free status-buf))
 
 
 (defmethod item-selected-p ((this list-select-text-item))
-  (/= 0 (claw:c-ref (item-status this) :int )))
+  (/= 0 (c-ref (item-status this) :int)))
 
 
 (defmethod select-item ((this list-select-text-item) status)
-  (setf (claw:c-ref (item-status this) :int) (if status 1 0)))
+  (setf (c-ref (item-status this) :int) (if status 1 0)))
 
 
 (defgeneric add-item (object item))
@@ -52,7 +52,8 @@
     (dolist (item items)
       (unless (= 0 (%nk:selectable-label *handle*
                                          (item-name-of item)
-                                         %nk:+text-left+
+                                         (cffi:foreign-bitfield-value '%nuklear:text-align
+                                                                      :left)
                                          (item-status item)))
         ;; todo: invoke listeners
         (dolist (other-item items)

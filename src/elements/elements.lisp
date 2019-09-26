@@ -4,12 +4,13 @@
 
 (defvar *zero-vec2* (vec2 0 0))
 (defvar *one-vec2* (vec2 1 1))
-(defvar *nk-buttons* (list %nk:+button-left+ :left
-                           %nk:+button-right+ :right
-                           %nk:+button-middle+ :middle))
+
+(declaim (special *panel*
+                  *row-height*))
 
 
-(defgeneric compose (element))
+(defparameter *nk-buttons* (list :left :right :middle))
+
 (defgeneric text-of (element))
 (defgeneric (setf text-of) (value element))
 
@@ -187,6 +188,10 @@
 (defmethod compose ((this behavior-element))
   (with-slots (delegate) this
     (compose delegate)))
+
+
+(defun default-row-height (child-height)
+  (float (or child-height (style :row-height)) 0f0))
 
 
 (defun calc-vertical-bounds (this)

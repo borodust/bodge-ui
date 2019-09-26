@@ -3,13 +3,6 @@
 ;;;
 ;;;
 ;;;
-(defun text-align->nk (align)
-  (ecase align
-    (:left %nk:+text-left+)
-    (:right %nk:+text-right+)
-    ((or :center :middle) %nk:+text-centered+)))
-
-
 (defclass label (widget)
   ((text :initarg :text :initform "" :reader text-of)
    (align :initarg :align)))
@@ -17,7 +10,7 @@
 
 (defmethod initialize-instance :after ((this label) &key (align :left))
   (with-slots ((this-align align)) this
-    (setf this-align (text-align->nk align))))
+    (setf this-align align)))
 
 
 (defmethod compose ((this label))
@@ -25,4 +18,6 @@
     (let ((text (if (functionp text)
                     (format nil "~A" (funcall text))
                     text)))
-      (%nk:label *handle* text align))))
+      (%nk:label *handle*
+                 text
+                 (cffi:foreign-enum-value '%nuklear:text-alignment align)))))
