@@ -494,7 +494,7 @@
     (when-let ((input-source (%input-source-of context)))
       (with-ui-input (context)
         (loop (multiple-value-bind (key state) (next-keyboard-interaction input-source)
-                (if key
+                (if (and key state)
                     (register-keyboard-input key state)
                     (return))))
         (let* ((cursor (last-cursor-position input-source
