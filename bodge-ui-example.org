@@ -219,7 +219,7 @@ But, lets get back to the task at hand. Here's our first window descriptor:
       (check-box :label "Check 2"))
      (vertical-layout
       (label :text "Awesomely" :align :left)
-      (label :text "Stacked" :align :middle)
+      (label :text "Stacked" :align :centered)
       (label :text "Labels" :align :right)))
     (label :text "Expand by width:")
     (horizontal-layout
