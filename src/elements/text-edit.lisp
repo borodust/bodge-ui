@@ -34,7 +34,7 @@
 (defmethod (setf text-of) ((value string) (this text-edit))
   (with-slots (buffer) this
     (c-let ((buf (:struct %nk:text-edit) :from buffer))
-      (let ((str-info (buf :string)))
+      (let ((str-info (buf :string &)))
         (%nk:str-clear str-info)
         (unless (alexandria:emptyp value)
           (cffi:with-foreign-string (string-ptr value :encoding :utf-8)

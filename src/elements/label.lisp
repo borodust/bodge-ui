@@ -4,7 +4,7 @@
 ;;;
 ;;;
 (defclass label (widget)
-  ((text :initarg :text :initform "" :reader text-of)
+  ((text :initarg :text :initform "" :accessor text-of)
    (align :initarg :align)))
 
 
@@ -19,5 +19,5 @@
                     (format nil "~A" (funcall text))
                     text)))
       (%nk:label *handle*
-                 text
+                 (or text "")
                  (cffi:foreign-enum-value '%nuklear:text-alignment align)))))
