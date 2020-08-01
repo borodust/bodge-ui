@@ -7,27 +7,30 @@
   ((buffer :initform (cffi:foreign-alloc '(:struct %nk:text-edit)))))
 
 
-(defmethod initialize-instance :after ((this text-edit) &key)
+(defmethod initialize-instance :after ((this text-edit) &key text)
   (with-slots (buffer) this
-    (%nk:textedit-init-default buffer)))
+    (%nk:textedit-init-default buffer))
+  (when text
+    (setf (text-of this) text)))
 
 
 (define-destructor text-edit (buffer)
   (cffi:foreign-free buffer))
 
 
-(defun make-text-edit (&key name)
-  (make-instance 'text-edit :name name))
+(defun make-text-edit (&key name text)
+  (make-instance 'text-edit :name name :text text))
 
 
 (defmethod text-of ((this text-edit))
   (with-slots (buffer) this
     (c-let ((buf (:struct %nk:text-edit) :from buffer))
-      (let* ((str-info (buf :string))
+      (let* ((str-info (buf :string &))
              (len (%nk:str-len-char str-info)))
         (if-let ((ptr (%nk:str-get-const str-info)))
-          (cffi:foreign-string-to-lisp ptr :count len
-                                           :encoding :utf-8)
+          (or (cffi:foreign-string-to-lisp ptr :count len
+                                               :encoding :utf-8)
+              "")
           "")))))
 
 
