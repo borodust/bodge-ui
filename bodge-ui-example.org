@@ -232,7 +232,8 @@ But, lets get back to the task at hand. Here's our first window descriptor:
      (button :label "0.75" :expand-ratio 0.75)
      (button :label "0.5" :expand-ratio 0.5))
     (label :text "Rest:")
-    (button :label "Top-Level Button"))
+    (button :label "Top-Level Button")
+    (combo-box :values '("this" "and" "that")))
 #+END_SRC
 
 Feel free to change the layout or window options and reevaluate the form. Your changes will be

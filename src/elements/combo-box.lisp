@@ -26,7 +26,10 @@
             for value in values
             for i from 0
             do (setf (array-ptr i) (cffi:foreign-string-alloc value)
-                     max-width (max max-width (calculate-text-width (%renderer-of *context*) value)))
+                     max-width (max max-width (calculate-text-width
+                                               (renderer-default-font
+                                                (%renderer-of *context*))
+                                               value)))
             finally (progn
                       (setf count (1+ i)
                             foreign-array (array-ptr &))
@@ -38,13 +41,13 @@
   (with-slots (foreign-array count selected drop-width drop-height) this
     (c-with ((size (:struct %nk:vec2)))
       (setf (size :x) drop-width
-            (size :y) (float (or drop-height (* count (+ *row-height* 8))) 0f0))
+            (size :y) (float (or drop-height (* count (+ (default-row-height) 8))) 0f0))
       (let ((new-value
               (%nk:combo *handle*
                          foreign-array
                          count
                          selected
-                         (floor *row-height*)
+                         (floor (default-row-height))
                          (size &))))
         (unless (= new-value selected)
           (setf selected new-value))))))

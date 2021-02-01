@@ -190,7 +190,7 @@
     (compose delegate)))
 
 
-(defun default-row-height (child-height)
+(defun default-row-height (&optional child-height)
   (float (or child-height (style :row-height)) 0f0))
 
 

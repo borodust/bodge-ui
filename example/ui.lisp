@@ -32,7 +32,8 @@
    (button :label "0.75" :expand-ratio 0.75)
    (button :label "0.5" :expand-ratio 0.5))
   (label :text "Rest:")
-  (button :label "Top-Level Button"))
+  (button :label "Top-Level Button")
+  (combo-box :values '("this" "and" "that")))
 
 (cl:in-package :bodge-ui.example)
 
