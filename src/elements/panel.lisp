@@ -291,19 +291,26 @@
 (defun update-panel-options (panel &rest opts)
   (with-slots (option-mask) panel
     (flet ((to-nuklear-opts (opts)
-             (let ((updated-opts (list :title :no-scrollbar :border)))
+             (let ((panel-opts (list :title :no-scrollbar :border))
+                   (window-opts (list)))
                (loop for opt in opts
-                     do (case opt
-                          (:resizable (push :scalable updated-opts))
-                          (:headerless (deletef updated-opts :title))
-                          (:borderless (deletef updated-opts :border))
-                          (:closable (push :closable updated-opts))
-                          (:minimizable (push :minimizable updated-opts))
-                          (:movable (push :movable updated-opts))
-                          (:backgrounded (push :background updated-opts))
-                          (:scrollable (deletef updated-opts :no-scrollbar))))
-               updated-opts)))
-      (setf option-mask (apply #'nk:panel-mask (to-nuklear-opts opts))))))
+                     do (ecase opt
+                          (:resizable (push :scalable panel-opts))
+                          (:headerless (deletef panel-opts :title))
+                          (:borderless (deletef panel-opts :border))
+                          (:closable (push :closable panel-opts))
+                          (:minimizable (push :minimizable panel-opts))
+                          (:movable (push :movable panel-opts))
+                          (:backgrounded (push :background panel-opts))
+                          (:scrollable (deletef panel-opts :no-scrollbar))
+                          (:inputless (push :no-input panel-opts))
+                          (:read-only (push :rom window-opts))))
+               (when (member :no-input panel-opts)
+                 ;; otherwise nuklear segfaults
+                 (deletef panel-opts :movable))
+               (logior (apply #'nk:panel-mask panel-opts)
+                       (apply #'nk:window-mask window-opts)))))
+      (setf option-mask (to-nuklear-opts opts)))))
 
 
 (defmacro defpanel (name-and-opts &body layout)
