@@ -54,7 +54,7 @@
 
 (defmethod initialize-instance :after ((this custom-widget) &key)
   (with-slots (bounds state) this
-    (setf bounds (cffi:foreign-alloc '(:struct %nk:rect))
+    (setf bounds (cffi:foreign-alloc '(:struct %nuklear:rect))
           ;; self-reference here should be safe enough - SBCL correctly collects the instance
           ;; maybe test on other implementations
           state this)))
@@ -101,16 +101,16 @@
                root-panel)
       this
     (setf root-panel *panel*)
-    (c-let ((ctx (:struct %nk:context) :from *handle*))
+    (c-let ((ctx (:struct %nuklear:context) :from *handle*))
       (flet ((widget-hovered-p ()
-               (= %nk:+true+ (%nk:input-is-mouse-hovering-rect (ctx :input &) bounds)))
+               (= %nuklear:+true+ (%nuklear:input-is-mouse-hovering-rect (ctx :input &) bounds)))
              (widget-clicked-p (button)
-               (= %nk:+true+ (%nk:input-is-mouse-click-in-rect (ctx :input &) button bounds)))
+               (= %nuklear:+true+ (%nuklear:input-is-mouse-click-in-rect (ctx :input &) button bounds)))
              (widget-pressed-p (button)
-               (= %nk:+true+ (%nk:input-has-mouse-click-down-in-rect (ctx :input &)
+               (= %nuklear:+true+ (%nuklear:input-has-mouse-click-down-in-rect (ctx :input &)
                                                                      button
                                                                      bounds
-                                                                     %nk:+true+))))
+                                                                     %nuklear:+true+))))
         (let ((*active-custom-widget* this)
               (hovered-p (widget-hovered-p))
               (clicked-buttons (loop for key in *nk-buttons* by #'cddr
@@ -173,11 +173,11 @@
 
 (defmethod compose ((this custom-widget))
   (with-slots (bounds) this
-    (%nk:widget bounds *handle*)
-    (c-val ((bounds (:struct %nk:rect)))
+    (%nuklear:widget bounds *handle*)
+    (c-val ((bounds (:struct %nuklear:rect)))
       (update-widget this (bounds :x) (bounds :y) (bounds :w) (bounds :h)))
     (setf (context-custom-widget (%id-of this)) this)
-    (c-let ((ctx (:struct %nk:context) :from *handle*))
-      (c-with ((id %nk:handle))
+    (c-let ((ctx (:struct %nuklear:context) :from *handle*))
+      (c-with ((id %nuklear:handle))
         (setf (id :id) (%id-of this))
-        (%nk:push-custom (ctx :current * :buffer &) bounds nil (id &))))))
+        (%nuklear:push-custom (ctx :current * :buffer &) bounds nil (id &))))))

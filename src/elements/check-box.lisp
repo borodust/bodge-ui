@@ -11,9 +11,9 @@
 
 (defmethod compose ((this check-box))
   (with-slots ((this-checked-p checked-p) click-listener label) this
-    (let ((checked-p (/= %nk:+false+
-                         (%nk:check-label *handle* label
-                                          (if this-checked-p %nk:+true+ %nk:+false+)))))
+    (let ((checked-p (/= %nuklear:+false+
+                         (%nuklear:check-label *handle* label
+                                          (if this-checked-p %nuklear:+true+ %nuklear:+false+)))))
       (unless (eq this-checked-p checked-p)
         (setf this-checked-p checked-p)
         (when click-listener

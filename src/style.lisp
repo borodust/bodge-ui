@@ -80,7 +80,7 @@
 ;; Nuklear Style Item
 ;;
 (defclass style-item (disposable)
-  ((handle :initform (cffi:foreign-alloc '(:struct %nk:style-item)) :reader %handle-of)))
+  ((handle :initform (cffi:foreign-alloc '(:struct %nuklear:style-item)) :reader %handle-of)))
 
 
 (define-destructor style-item (handle)
@@ -93,9 +93,9 @@
 (defmethod initialize-instance :after ((this color-style-item)
                                        &key color)
   (with-slots (handle) this
-    (c-with ((color-v (:struct %nk:color)))
-      (%nk:style-item-color handle
-                            (%nk:rgba-f (color-v &)
+    (c-with ((color-v (:struct %nuklear:color)))
+      (%nuklear:style-item-color handle
+                            (%nuklear:rgba-f (color-v &)
                                         (float (x color) 0f0)
                                         (float (y color) 0f0)
                                         (float (z color) 0f0)
@@ -107,10 +107,10 @@
 
 
 (defun nk->style-item (style-item)
-  (c-val ((style-item (:struct %nk:style-item)))
+  (c-val ((style-item (:struct %nuklear:style-item)))
     (switch ((style-item :type) :test #'eq)
       (:color
-       (c-let ((nk-color (:struct %nk:color) :from (style-item :data &)))
+       (c-let ((nk-color (:struct %nuklear:color) :from (style-item :data &)))
          (make-color-style-item (clamp-vec4 (nk-color :r)
                                             (nk-color :g)
                                             (nk-color :b)
@@ -120,7 +120,7 @@
 
 (defun style-item->nk (style-item dest-ptr)
   (%libc.es:memcpy dest-ptr (%handle-of style-item) (cffi:foreign-type-size
-                                                     '(:struct %nk:style-item))))
+                                                     '(:struct %nuklear:style-item))))
 
 
 
@@ -128,8 +128,8 @@
 ;; Nuklear Styles
 ;;
 (defmacro with-nk-style ((nk-style) &body body)
-  `(c-let ((,nk-style (:struct %nk:style)
-                      :from (c-ref *handle* (:struct %nk:context) :style &)))
+  `(c-let ((,nk-style (:struct %nuklear:style)
+                      :from (c-ref *handle* (:struct %nuklear:context) :style &)))
      ,@body))
 
 

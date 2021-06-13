@@ -97,14 +97,14 @@
 
 
 (defmethod compose ((this pane))
-  (let ((begin-result (%nk:group-begin-titled *handle*
+  (let ((begin-result (%nuklear:group-begin-titled *handle*
                                               (%pane-id-of this)
                                               ""
                                               (nk:panel-mask :no-scrollbar))))
     (unless (= begin-result 0)
       (unwind-protect
            (compose-pane this)
-        (%nk:group-end *handle*)))))
+        (%nuklear:group-end *handle*)))))
 
 ;;;
 ;;; WIDGET

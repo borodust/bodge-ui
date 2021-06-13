@@ -9,7 +9,7 @@
 
 (defmethod initialize-instance :after ((this color-picker) &key (color (vec4 1 1 1 1)))
   (with-slots ((this-color color)) this
-    (setf this-color (c-let ((color-f (:struct %nk:colorf) :alloc t))
+    (setf this-color (c-let ((color-f (:struct %nuklear:colorf) :alloc t))
                        (setf (color-f :r) (x color)
                              (color-f :g) (y color)
                              (color-f :b) (z color)
@@ -23,4 +23,4 @@
 
 (defmethod compose ((this color-picker))
   (with-slots (color) this
-    (%nk:color-picker color *handle* color :rgba)))
+    (%nuklear:color-picker color *handle* color :rgba)))

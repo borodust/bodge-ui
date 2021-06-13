@@ -9,4 +9,4 @@
 
 (defmethod compose ((this spacing))
   (with-slots (columns) this
-    (%nk:spacing *handle* (floor columns))))
+    (%nuklear:spacing *handle* (floor columns))))

@@ -7,6 +7,6 @@
 
 
 (defmethod compose ((this menu-bar))
-  (%nk:menubar-begin *handle*)
+  (%nuklear:menubar-begin *handle*)
   (call-next-method)
-  (%nk:menubar-end *handle*))
+  (%nuklear:menubar-end *handle*))

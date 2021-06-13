@@ -18,8 +18,8 @@
     (multiple-value-bind (child-width child-height) (calc-bounds child)
       (let ((height (default-row-height child-height)))
         (if child-width
-            (%nk:layout-row-static *handle* height (floor child-width) 1)
-            (%nk:layout-row-dynamic *handle* height 1)))
+            (%nuklear:layout-row-static *handle* height (floor child-width) 1)
+            (%nuklear:layout-row-dynamic *handle* height 1)))
       (compose child))))
 
 ;;;
@@ -55,29 +55,29 @@
 
 (defun compose-horizontal-expand (this height expand-range child-count)
   (let ((normalizing-expand-multiplier (float (/ 1 (if (= expand-range 0) 1 expand-range)) 0f0)))
-    (%nk:layout-row-begin *handle* :dynamic height child-count)
+    (%nuklear:layout-row-begin *handle* :dynamic height child-count)
     (unwind-protect
          (dochildren (child this)
            (let ((expand-ratio (expand-ratio-of child)))
              (if expand-ratio
-                 (%nk:layout-row-push *handle* (float (* expand-ratio normalizing-expand-multiplier)
+                 (%nuklear:layout-row-push *handle* (float (* expand-ratio normalizing-expand-multiplier)
                                                       0f0))
-                 (%nk:layout-row-push *handle* normalizing-expand-multiplier)))
+                 (%nuklear:layout-row-push *handle* normalizing-expand-multiplier)))
            (compose child))
-      (%nk:layout-row-end *handle*))))
+      (%nuklear:layout-row-end *handle*))))
 
 
 (defun compose-horizontal-flex (this height)
-  (%nk:layout-row-template-begin *handle* height)
+  (%nuklear:layout-row-template-begin *handle* height)
   (unwind-protect
        (dochildren (child this)
          (if-let ((width (calc-bounds child)))
            (if (expandablep child)
-               (%nk:layout-row-template-push-variable *handle* (float width 0f0))
-               (%nk:layout-row-template-push-static *handle* (float width 0f0)))
-           (%nk:layout-row-template-push-dynamic *handle*)))
+               (%nuklear:layout-row-template-push-variable *handle* (float width 0f0))
+               (%nuklear:layout-row-template-push-static *handle* (float width 0f0)))
+           (%nuklear:layout-row-template-push-dynamic *handle*)))
     (float-features:with-float-traps-masked t
-      (%nk:layout-row-template-end *handle*)))
+      (%nuklear:layout-row-template-end *handle*)))
   (dochildren (child this)
     (compose child)))
 

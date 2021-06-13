@@ -39,11 +39,11 @@
 
 (defmethod compose ((this combo-box))
   (with-slots (foreign-array count selected drop-width drop-height) this
-    (c-with ((size (:struct %nk:vec2)))
+    (c-with ((size (:struct %nuklear:vec2)))
       (setf (size :x) drop-width
             (size :y) (float (or drop-height (* count (+ (default-row-height) 8))) 0f0))
       (let ((new-value
-              (%nk:combo *handle*
+              (%nuklear:combo *handle*
                          foreign-array
                          count
                          selected

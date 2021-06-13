@@ -52,10 +52,10 @@
 
 (defmethod render-ui ((renderer nuklear-renderer))
   (with-slots (width height pixel-ratio handle) renderer
-    (c-let ((nk-context (:struct %nk:context) :from bodge-ui::*handle*))
+    (c-let ((nk-context (:struct %nuklear:context) :from bodge-ui::*handle*))
       (let ((default-font (nk-context :style :font)))
         (unwind-protect
              (nk-renderer:render-nuklear (%handle-of renderer)
                                          (nk-context &)
                                          width height pixel-ratio)
-          (%nk:style-set-font (nk-context &) default-font))))))
+          (%nuklear:style-set-font (nk-context &) default-font))))))

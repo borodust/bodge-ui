@@ -14,7 +14,7 @@
 
 
 (defun bodge-color (nk-color)
-  (c-val ((nk-color (:struct %nk:color)))
+  (c-val ((nk-color (:struct %nuklear:color)))
     (clamp-vec4 (nk-color :r) (nk-color :g) (nk-color :b) (nk-color :a))))
 
 
@@ -28,174 +28,174 @@
 
 
 (defun scissor-origin ()
-  (as-command (cmd %nk:command-scissor)
+  (as-command (cmd %nuklear:command-scissor)
     (vec2 (cmd :x) (%invert (cmd :y) (cmd :h)))))
 
 
 (defun scissor-width ()
-  (as-command (cmd %nk:command-scissor)
+  (as-command (cmd %nuklear:command-scissor)
     (cmd :w)))
 
 
 (defun scissor-height ()
-  (as-command (cmd %nk:command-scissor)
+  (as-command (cmd %nuklear:command-scissor)
     (cmd :h)))
 
 
 (defun line-origin ()
-  (as-command (cmd %nk:command-line)
+  (as-command (cmd %nuklear:command-line)
     (let ((x0 (cmd :begin :x))
           (y0 (cmd :begin :y)))
       (vec2 x0 (%invert y0)))))
 
 
 (defun line-end ()
-  (as-command (cmd %nk:command-line)
+  (as-command (cmd %nuklear:command-line)
     (let ((x1 (cmd :end :x))
           (y1 (cmd :end :y)))
       (vec2 x1 (%invert y1)))))
 
 
 (defun line-color ()
-  (as-command (cmd %nk:command-line)
+  (as-command (cmd %nuklear:command-line)
     (bodge-color (cmd :color))))
 
 
 (defun line-thickness ()
-  (as-command (cmd %nk:command-line)
+  (as-command (cmd %nuklear:command-line)
     (cmd :line-thickness)))
 
 
 (defun curve-origin ()
-  (as-command (cmd %nk:command-curve)
+  (as-command (cmd %nuklear:command-curve)
     (let ((x0 (cmd :begin :x))
           (y0 (cmd :begin :y)))
       (vec2 x0 (%invert y0)))))
 
 
 (defun curve-end ()
-  (as-command (cmd %nk:command-curve)
+  (as-command (cmd %nuklear:command-curve)
     (let ((x1 (cmd :end :x))
           (y1 (cmd :end :y)))
       (vec2 x1 (%invert y1)))))
 
 
 (defun curve-first-control-point ()
-  (as-command (cmd %nk:command-curve)
+  (as-command (cmd %nuklear:command-curve)
     (let ((cx0 (cmd :ctrl 0 :x))
           (cy0 (cmd :ctrl 0 :y)))
       (vec2 cx0 (%invert cy0)))))
 
 
 (defun curve-second-control-point ()
-  (as-command (cmd %nk:command-curve)
+  (as-command (cmd %nuklear:command-curve)
     (let ((cx1 (cmd :ctrl 1 :x))
           (cy1 (cmd :ctrl 1 :y)))
       (vec2 cx1 (%invert cy1)))))
 
 
 (defun curve-color ()
-  (as-command (cmd %nk:command-curve)
+  (as-command (cmd %nuklear:command-curve)
     (bodge-color (cmd :color))))
 
 
 (defun curve-thickness ()
-  (as-command (cmd %nk:command-curve)
+  (as-command (cmd %nuklear:command-curve)
     (cmd :line-thickness)))
 
 
 (defun rect-origin ()
-  (as-command (cmd %nk:command-rect)
+  (as-command (cmd %nuklear:command-rect)
     (vec2 (cmd :x) (%invert (cmd :y) (cmd :h)))))
 
 
 (defun rect-width ()
-  (as-command (cmd %nk:command-rect)
+  (as-command (cmd %nuklear:command-rect)
     (cmd :w)))
 
 
 (defun rect-height ()
-  (as-command (cmd %nk:command-rect)
+  (as-command (cmd %nuklear:command-rect)
     (cmd :h)))
 
 
 (defun rect-stroke-color ()
-  (as-command (cmd %nk:command-rect)
+  (as-command (cmd %nuklear:command-rect)
     (bodge-color (cmd :color &))))
 
 
 (defun rect-stroke-thickness ()
-  (as-command (cmd %nk:command-rect)
+  (as-command (cmd %nuklear:command-rect)
     (cmd :line-thickness)))
 
 
 (defun rect-rounding ()
-  (as-command (cmd %nk:command-rect)
+  (as-command (cmd %nuklear:command-rect)
     (cmd :rounding)))
 
 
 (defun filled-rect-origin ()
-  (as-command (cmd %nk:command-rect-filled)
+  (as-command (cmd %nuklear:command-rect-filled)
     (vec2 (cmd :x) (%invert (cmd :y) (cmd :h)))))
 
 
 (defun filled-rect-width ()
-  (as-command (cmd %nk:command-rect-filled)
+  (as-command (cmd %nuklear:command-rect-filled)
     (cmd :w)))
 
 
 (defun filled-rect-height ()
-  (as-command (cmd %nk:command-rect-filled)
+  (as-command (cmd %nuklear:command-rect-filled)
     (cmd :h)))
 
 
 (defun filled-rect-color ()
-  (as-command (cmd %nk:command-rect-filled)
+  (as-command (cmd %nuklear:command-rect-filled)
     (bodge-color (cmd :color &))))
 
 
 (defun filled-rect-rounding ()
-  (as-command (cmd %nk:command-rect-filled)
+  (as-command (cmd %nuklear:command-rect-filled)
     (cmd :rounding)))
 
 
 (defun multi-color-rect-origin ()
-  (as-command (cmd %nk:command-rect-multi-color)
+  (as-command (cmd %nuklear:command-rect-multi-color)
     (vec2 (cmd :x) (%invert (cmd :y) (cmd :h)))))
 
 
 (defun multi-color-rect-width ()
-  (as-command (cmd %nk:command-rect-multi-color)
+  (as-command (cmd %nuklear:command-rect-multi-color)
     (cmd :w)))
 
 
 (defun multi-color-rect-height ()
-  (as-command (cmd %nk:command-rect-multi-color)
+  (as-command (cmd %nuklear:command-rect-multi-color)
     (cmd :h)))
 
 
 (defun multi-color-rect-left-color ()
-  (as-command (cmd %nk:command-rect-multi-color)
+  (as-command (cmd %nuklear:command-rect-multi-color)
     (bodge-color (cmd :left))))
 
 
 (defun multi-color-rect-top-color ()
-  (as-command (cmd %nk:command-rect-multi-color)
+  (as-command (cmd %nuklear:command-rect-multi-color)
     (bodge-color (cmd :top))))
 
 
 (defun multi-color-rect-bottom-color ()
-  (as-command (cmd %nk:command-rect-multi-color)
+  (as-command (cmd %nuklear:command-rect-multi-color)
     (bodge-color (cmd :bottom))))
 
 
 (defun multi-color-rect-right-color ()
-  (as-command (cmd %nk:command-rect-multi-color)
+  (as-command (cmd %nuklear:command-rect-multi-color)
     (bodge-color (cmd :right))))
 
 
 (defun ellipse-origin ()
-  (as-command (cmd %nk:command-circle)
+  (as-command (cmd %nuklear:command-circle)
     (let* ((x (cmd :x))
            (y (cmd :y))
            (w (cmd :w))
@@ -206,27 +206,27 @@
 
 
 (defun ellipse-radius-x ()
-  (as-command (cmd %nk:command-circle)
+  (as-command (cmd %nuklear:command-circle)
     (/ (cmd :w) 2)))
 
 
 (defun ellipse-radius-y ()
-  (as-command (cmd %nk:command-circle)
+  (as-command (cmd %nuklear:command-circle)
     (/ (cmd :h) 2)))
 
 
 (defun ellipse-stroke-color ()
-  (as-command (cmd %nk:command-circle)
+  (as-command (cmd %nuklear:command-circle)
     (bodge-color (cmd :color))))
 
 
 (defun ellipse-stroke-thickness ()
-  (as-command (cmd %nk:command-circle)
+  (as-command (cmd %nuklear:command-circle)
     (cmd :line-thickness)))
 
 
 (defun filled-ellipse-origin ()
-  (as-command (cmd %nk:command-circle-filled)
+  (as-command (cmd %nuklear:command-circle-filled)
     (let* ((x (cmd :x))
            (y (cmd :y))
            (w (cmd :w))
@@ -237,230 +237,230 @@
 
 
 (defun filled-ellipse-radius-x ()
-  (as-command (cmd %nk:command-circle-filled)
+  (as-command (cmd %nuklear:command-circle-filled)
     (/ (cmd :w) 2)))
 
 
 (defun filled-ellipse-radius-y ()
-  (as-command (cmd %nk:command-circle-filled)
+  (as-command (cmd %nuklear:command-circle-filled)
     (/ (cmd :h) 2)))
 
 
 (defun filled-ellipse-color ()
-  (as-command (cmd %nk:command-circle-filled)
+  (as-command (cmd %nuklear:command-circle-filled)
     (bodge-color (cmd :color &))))
 
 
 (defun arc-origin ()
-  (as-command (cmd %nk:command-arc)
+  (as-command (cmd %nuklear:command-arc)
     (vec2 (cmd :cx) (%invert (cmd :cy)))))
 
 
 (defun arc-radius ()
-  (as-command (cmd %nk:command-arc)
+  (as-command (cmd %nuklear:command-arc)
     (cmd :r)))
 
 
 (defun arc-start-angle ()
-  (as-command (cmd %nk:command-arc)
+  (as-command (cmd %nuklear:command-arc)
     (cmd :a 0)))
 
 
 (defun arc-end-angle ()
-  (as-command (cmd %nk:command-arc)
+  (as-command (cmd %nuklear:command-arc)
     (cmd :a 1)))
 
 
 (defun arc-stroke-color ()
-  (as-command (cmd %nk:command-arc)
+  (as-command (cmd %nuklear:command-arc)
     (bodge-color (cmd :color))))
 
 
 (defun arc-stroke-thickness ()
-  (as-command (cmd %nk:command-arc)
+  (as-command (cmd %nuklear:command-arc)
     (cmd :line-thickness)))
 
 
 (defun filled-arc-origin ()
-  (as-command (cmd %nk:command-arc-filled)
+  (as-command (cmd %nuklear:command-arc-filled)
     (vec2 (cmd :cx) (%invert (cmd :cy)))))
 
 
 (defun filled-arc-radius ()
-  (as-command (cmd %nk:command-arc-filled)
+  (as-command (cmd %nuklear:command-arc-filled)
     (cmd :r)))
 
 
 (defun filled-arc-start-angle ()
-  (as-command (cmd %nk:command-arc-filled)
+  (as-command (cmd %nuklear:command-arc-filled)
     (cmd :a 0)))
 
 
 (defun filled-arc-end-angle ()
-  (as-command (cmd %nk:command-arc-filled)
+  (as-command (cmd %nuklear:command-arc-filled)
     (cmd :a 1)))
 
 
 (defun filled-arc-color ()
-  (as-command (cmd %nk:command-arc-filled)
+  (as-command (cmd %nuklear:command-arc-filled)
     (bodge-color (cmd :color))))
 
 
 (defun triangle-origin ()
-  (as-command (cmd %nk:command-triangle)
+  (as-command (cmd %nuklear:command-triangle)
     (vec2 (cmd :a :x) (%invert (cmd :a :y)))))
 
 
 (defun triangle-second-vertex ()
-  (as-command (cmd %nk:command-triangle)
+  (as-command (cmd %nuklear:command-triangle)
     (vec2 (cmd :b :x) (%invert (cmd :b :y)))))
 
 
 (defun triangle-third-vertex ()
-  (as-command (cmd %nk:command-triangle)
+  (as-command (cmd %nuklear:command-triangle)
     (vec2 (cmd :c :x) (%invert (cmd :c :y)))))
 
 
 (defun triangle-stroke-color ()
-  (as-command (cmd %nk:command-triangle)
+  (as-command (cmd %nuklear:command-triangle)
     (bodge-color (cmd :color))))
 
 
 (defun triangle-stroke-thickness ()
-  (as-command (cmd %nk:command-triangle)
+  (as-command (cmd %nuklear:command-triangle)
     (cmd :line-thickness)))
 
 
 (defun filled-triangle-origin ()
-  (as-command (cmd %nk:command-triangle-filled)
+  (as-command (cmd %nuklear:command-triangle-filled)
     (vec2 (cmd :a :x) (%invert (cmd :a :y)))))
 
 
 (defun filled-triangle-second-vertex ()
-  (as-command (cmd %nk:command-triangle-filled)
+  (as-command (cmd %nuklear:command-triangle-filled)
     (vec2 (cmd :b :x) (%invert (cmd :b :y)))))
 
 
 (defun filled-triangle-third-vertex ()
-  (as-command (cmd %nk:command-triangle-filled)
+  (as-command (cmd %nuklear:command-triangle-filled)
     (vec2 (cmd :c :x) (%invert (cmd :c :y)))))
 
 
 (defun filled-triangle-color ()
-  (as-command (cmd %nk:command-triangle-filled)
+  (as-command (cmd %nuklear:command-triangle-filled)
     (bodge-color (cmd :color &))))
 
 
 (defun polygon-vertices ()
-  (as-command (cmd %nk:command-polygon)
+  (as-command (cmd %nuklear:command-polygon)
     (loop for i from 0 below (cmd :point-count)
           collect (vec2 (cmd :points i :x) (%invert (cmd :points i :y))))))
 
 
 (defun polygon-stroke-color ()
-  (as-command (cmd %nk:command-polygon)
+  (as-command (cmd %nuklear:command-polygon)
     (bodge-color (cmd :color))))
 
 
 (defun polygon-stroke-thickness ()
-  (as-command (cmd %nk:command-polygon)
+  (as-command (cmd %nuklear:command-polygon)
     (cmd :line-thickness)))
 
 
 (defun filled-polygon-vertices ()
-  (as-command (cmd %nk:command-polygon-filled)
+  (as-command (cmd %nuklear:command-polygon-filled)
     (loop for i from 0 below (cmd :point-count)
           collect (vec2 (cmd :points i :x) (%invert (cmd :points i :y))))))
 
 
 (defun filled-polygon-color ()
-  (as-command (cmd %nk:command-polygon-filled)
+  (as-command (cmd %nuklear:command-polygon-filled)
     (bodge-color (cmd :color))))
 
 
 (defun polyline-vertices ()
-  (as-command (cmd %nk:command-polyline)
+  (as-command (cmd %nuklear:command-polyline)
     (loop for i from 0 below (cmd :point-count)
           collect (vec2 (cmd :points i :x) (%invert (cmd :points i :y))))))
 
 
 (defun polyline-color ()
-  (as-command (cmd %nk:command-polyline)
+  (as-command (cmd %nuklear:command-polyline)
     (bodge-color (cmd :color))))
 
 
 (defun polyline-thickness ()
-  (as-command (cmd %nk:command-polyline)
+  (as-command (cmd %nuklear:command-polyline)
     (cmd :line-thickness)))
 
 
 (defun text-box-origin ()
-  (as-command (cmd %nk:command-text)
+  (as-command (cmd %nuklear:command-text)
     (vec2 (cmd :x) (%invert (cmd :y) (cmd :height)))))
 
 
 (defun text-background-color ()
-  (as-command (cmd %nk:command-text)
+  (as-command (cmd %nuklear:command-text)
     (bodge-color (cmd :background))))
 
 
 (defun text-foreground-color ()
-  (as-command (cmd %nk:command-text)
+  (as-command (cmd %nuklear:command-text)
     (bodge-color (cmd :foreground &))))
 
 
 (defun text-box-width ()
-  (as-command (cmd %nk:command-text)
+  (as-command (cmd %nuklear:command-text)
     (bodge-color (cmd :w))))
 
 
 (defun text-box-height ()
-  (as-command (cmd %nk:command-text)
+  (as-command (cmd %nuklear:command-text)
     (bodge-color (cmd :h))))
 
 
 (defun text-string ()
-  (as-command (cmd %nk:command-text)
+  (as-command (cmd %nuklear:command-text)
     (cffi:foreign-string-to-lisp (cmd :string &) :count (cmd :length))))
 
 
 (defun image-origin ()
-  (as-command (cmd %nk:command-image)
+  (as-command (cmd %nuklear:command-image)
     (vec2 (cmd :x) (%invert (cmd :y) (cmd :h)))))
 
 
 (defun image-width ()
-  (as-command (cmd %nk:command-image)
+  (as-command (cmd %nuklear:command-image)
     (cmd :w)))
 
 
 (defun image-height ()
-  (as-command (cmd %nk:command-image)
+  (as-command (cmd %nuklear:command-image)
     (cmd :h)))
 
 
 (defun image-color ()
-  (as-command (cmd %nk:command-image)
+  (as-command (cmd %nuklear:command-image)
     (bodge-color (cmd :col))))
 
 
 (defun %custom-widget-origin ()
-  (as-command (cmd %nk:command-custom)
+  (as-command (cmd %nuklear:command-custom)
     (vec2 (cmd :x) (%invert (cmd :y) (cmd :h)))))
 
 
 (defun %custom-widget-width ()
-  (as-command (cmd %nk:command-custom)
+  (as-command (cmd %nuklear:command-custom)
     (cmd :w)))
 
 
 (defun %custom-widget-height ()
-  (as-command (cmd %nk:command-custom)
+  (as-command (cmd %nuklear:command-custom)
     (cmd :h)))
 
 
 (defun %custom-widget-instance ()
-  (as-command (cmd %nk:command-custom)
+  (as-command (cmd %nuklear:command-custom)
     (let ((widget-id (cmd :callback-data :id)))
       (context-custom-widget widget-id))))
 
@@ -474,7 +474,7 @@
 
 
 (defun command-type ()
-  (as-command (cmd %nk:command)
+  (as-command (cmd %nuklear:command)
     (cmd :type)))
 
 

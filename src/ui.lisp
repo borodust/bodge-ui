@@ -92,13 +92,13 @@
 
 (defun %remove-panel (ui panel)
   (alexandria:deletef (%panels-of ui) panel)
-  (%nk:window-close (%handle-of ui) (%pane-id-of panel)))
+  (%nuklear:window-close (%handle-of ui) (%pane-id-of panel)))
 
 
 (defun %remove-all-panels (ui)
   (let ((ui-handle (%handle-of ui)))
     (dolist (panel (%panels-of ui))
-      (%nk:window-close ui-handle (%pane-id-of panel))))
+      (%nuklear:window-close ui-handle (%pane-id-of panel))))
   (setf (%panels-of ui) nil))
 
 
@@ -123,7 +123,7 @@
 
 
 (defun find-custom-widget-from-command (command &optional (ui *context*))
-  (c-val ((command (:struct %nk:command-custom)))
+  (c-val ((command (:struct %nuklear:command-custom)))
     (context-custom-widget (cffi:pointer-address (command :callback-data :ptr)) ui)))
 
 
@@ -156,37 +156,37 @@
 (defmacro with-ui-input ((ui) &body body)
   `(with-ui (,ui)
      (prog2
-         (%nk:input-begin *handle*)
+         (%nuklear:input-begin *handle*)
          (progn ,@body)
-       (%nk:input-end *handle*))))
+       (%nuklear:input-end *handle*))))
 
 
 (defun clear-ui (&optional (ui *context*))
   (with-slots (custom-widget-table) ui
     (clrhash custom-widget-table))
-  (%nk:clear (%handle-of ui)))
+  (%nuklear:clear (%handle-of ui)))
 
 
 (defun register-cursor-position (x y)
-  (%nk:input-motion *handle* (floor x)
+  (%nuklear:input-motion *handle* (floor x)
                     (floor (- (renderer-canvas-height (%renderer-of *context*)) y))))
 
 
 (defun register-character-input (character)
-  (%nk:input-unicode *handle* (char-code character)))
+  (%nuklear:input-unicode *handle* (char-code character)))
 
 
 (defun register-scroll-input (x y)
-  (c-with ((vec (:struct %nk:vec2)))
+  (c-with ((vec (:struct %nuklear:vec2)))
     (setf (vec :x) (float x 0f0)
           (vec :y) (- (float y 0f0)))
-    (%nk:input-scroll *handle* (vec &))))
+    (%nuklear:input-scroll *handle* (vec &))))
 
 
 (defun button-state->nk (state)
   (ecase state
-    (:pressed %nk:+true+)
-    (:released %nk:+false+)))
+    (:pressed %nuklear:+true+)
+    (:released %nuklear:+false+)))
 
 
 (defvar *nk-key-map*
@@ -214,12 +214,12 @@
       (progn
         (register-keyboard-input key :released)
         (register-keyboard-input key :pressed))
-      (%nk:input-key *handle* (key->nk key) (button-state->nk state))))
+      (%nuklear:input-key *handle* (key->nk key) (button-state->nk state))))
 
 
 (defun register-mouse-input (x y button state)
   (let ((nk-state (button-state->nk state)))
-    (%nk:input-button *handle* button
+    (%nuklear:input-button *handle* button
                       (floor x) (floor (- (renderer-canvas-height (%renderer-of *context*)) y))
                       nk-state)))
 
@@ -236,7 +236,7 @@
 
 (defmethod initialize-instance :after ((this %vec2) &key (x 0f0) (y 0f0))
   (with-slots (handle) this
-    (c-let ((vec (:struct %nk:vec2) :alloc t))
+    (c-let ((vec (:struct %nuklear:vec2) :alloc t))
       (setf (vec :x) (float x 0f0)
             (vec :y) (float y 0f0)
             handle (vec &)))))
@@ -244,7 +244,7 @@
 
 (defmacro with-vec2-accessor ((value accessor %vec2) &body body)
   (alexandria:with-gensyms (vec)
-    `(c-let ((,vec (:struct %nk:vec2) :from (%handle-of ,%vec2)))
+    `(c-let ((,vec (:struct %nuklear:vec2) :from (%handle-of ,%vec2)))
        (symbol-macrolet ((,value (,vec ,accessor)))
          ,@body))))
 

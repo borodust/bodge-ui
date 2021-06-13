@@ -17,7 +17,7 @@
    (collapsed-p :initform nil :reader minimizedp)
    (option-mask :initarg :option-mask :initform '())
    (style :initform nil)
-   (bounds :initform (cffi:foreign-alloc '(:struct %nk:rect)))
+   (bounds :initform (cffi:foreign-alloc '(:struct %nuklear:rect)))
    (redefined-p :initform nil)
    (bounds-updated-p :initform nil)))
 
@@ -102,12 +102,12 @@
 
 (defun minimize-panel (panel)
   (with-ui-access (*context*)
-    (%nk:window-collapse *handle* (%pane-id-of panel) :minimized)))
+    (%nuklear:window-collapse *handle* (%pane-id-of panel) :minimized)))
 
 
 (defun restore-panel (panel)
   (with-ui-access (*context*)
-    (%nk:window-collapse *handle* (%pane-id-of panel) :maximized)))
+    (%nuklear:window-collapse *handle* (%pane-id-of panel) :maximized)))
 
 
 (defun setup-panel (panel &key
@@ -215,22 +215,22 @@
 (defun compose-panel (win)
   (with-slots (x y width height title option-mask bounds bounds-updated-p) win
     (%ensure-panel-dimensions win)
-    (c-val ((bounds (:struct %nk:rect)))
+    (c-val ((bounds (:struct %nuklear:rect)))
       (setf (bounds :x) (float x 0f0)
             (bounds :y) (float (invert-y y height) 0f0)
             (bounds :w) (float width 0f0)
             (bounds :h) (float height 0f0))
       (when bounds-updated-p
-        (%nk:window-set-bounds *handle* (%pane-id-of win) (bounds &))
+        (%nuklear:window-set-bounds *handle* (%pane-id-of win) (bounds &))
         (setf bounds-updated-p nil))
-      (let ((val (%nk:begin-titled *handle*
+      (let ((val (%nuklear:begin-titled *handle*
                                    (%pane-id-of win)
                                    title
                                    (bounds &)
                                    option-mask)))
         (unwind-protect
              (unless (= 0 val)
-               (%nk:window-get-bounds (bounds &) *handle*)
+               (%nuklear:window-get-bounds (bounds &) *handle*)
                (let ((prev-x x)
                      (prev-y y))
                  (setf width (bounds :w)
@@ -243,9 +243,9 @@
                (loop for child in (children-of win)
                      do (multiple-value-bind (width height) (calc-bounds child)
                           (declare (ignore width))
-                          (%nk:layout-row-dynamic *handle* (default-row-height height) 1)
+                          (%nuklear:layout-row-dynamic *handle* (default-row-height height) 1)
                           (compose child))))
-          (%nk:end *handle*))))))
+          (%nuklear:end *handle*))))))
 
 
 (defmethod compose ((this panel))
@@ -257,12 +257,12 @@
               bounds-updated-p t))
       (let* ((*panel* this))
         (compose-panel this))
-      (when (or (/= %nk:+false+ (%nk:window-is-hidden *handle* (%pane-id-of this)))
-                (/= %nk:+false+ (%nk:window-is-closed *handle* (%pane-id-of this))))
+      (when (or (/= %nuklear:+false+ (%nuklear:window-is-hidden *handle* (%pane-id-of this)))
+                (/= %nuklear:+false+ (%nuklear:window-is-closed *handle* (%pane-id-of this))))
         (setf hidden-p t)
         (on-close this))
-      (unless (eq (/= %nk:+false+
-                      (%nk:window-is-collapsed *handle* (%pane-id-of this)))
+      (unless (eq (/= %nuklear:+false+
+                      (%nuklear:window-is-collapsed *handle* (%pane-id-of this)))
                   collapsed-p)
         (setf collapsed-p (not collapsed-p))
         (if collapsed-p

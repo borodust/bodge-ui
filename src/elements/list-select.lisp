@@ -48,9 +48,9 @@
 
 (defmethod compose ((this list-select))
   (with-slots (items item-height status-buf) this
-    (%nk:layout-row-dynamic *handle* (float item-height) 1)
+    (%nuklear:layout-row-dynamic *handle* (float item-height) 1)
     (dolist (item items)
-      (unless (= 0 (%nk:selectable-label *handle*
+      (unless (= 0 (%nuklear:selectable-label *handle*
                                          (item-name-of item)
                                          (cffi:foreign-bitfield-value '%nuklear:text-align
                                                                       :left)

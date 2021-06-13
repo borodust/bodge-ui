@@ -56,8 +56,8 @@
 (defmethod compose ((this radio))
   (with-slots (activated-p click-listener label) this
     (register-radio this)
-    (let ((return-value (%nk:option-label *handle* label (if activated-p 1 0))))
-      (unless (= return-value %nk:+false+)
+    (let ((return-value (%nuklear:option-label *handle* label (if activated-p 1 0))))
+      (unless (= return-value %nuklear:+false+)
         (setf activated-p t)
         (activate-radio this)
         (when click-listener

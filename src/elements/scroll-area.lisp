@@ -4,7 +4,7 @@
 ;;; SCROLL AREA
 ;;;
 (defclass scroll-area (disposable basic-pane widget)
-  ((nk-scroll :initform (cffi:foreign-alloc '(:struct %nk:scroll)))
+  ((nk-scroll :initform (cffi:foreign-alloc '(:struct %nuklear:scroll)))
    (layout :initform (make-instance 'vertical-layout))))
 
 
@@ -46,7 +46,7 @@
 
 (defun update-area-scroll-position (pane x y)
   (with-slots (nk-scroll) pane
-    (c-let ((scroll (:struct %nk:scroll) :from nk-scroll))
+    (c-let ((scroll (:struct %nuklear:scroll) :from nk-scroll))
       (setf (scroll :x) (round x)
             (scroll :y) (round y)))
     (values)))
@@ -54,7 +54,7 @@
 
 (defun %area-scroll-position (pane)
   (with-slots (nk-scroll) pane
-    (c-let ((scroll (:struct %nk:scroll) :from nk-scroll))
+    (c-let ((scroll (:struct %nuklear:scroll) :from nk-scroll))
       (values (scroll :x) (scroll :y)))))
 
 
@@ -73,7 +73,7 @@
 
 (defmethod compose ((this scroll-area))
   (with-slots (nk-scroll layout) this
-    (let ((begin-result (%nk:group-scrolled-begin *handle*
+    (let ((begin-result (%nuklear:group-scrolled-begin *handle*
                                                   nk-scroll
                                                   (%pane-id-of this)
                                                   0)))
@@ -82,7 +82,7 @@
              (multiple-value-bind (width height) (calc-bounds layout)
                (let ((height (default-row-height height)))
                  (if width
-                     (%nk:layout-row-static *handle* height (round width) 1)
-                     (%nk:layout-row-dynamic *handle* height 1)))
+                     (%nuklear:layout-row-static *handle* height (round width) 1)
+                     (%nuklear:layout-row-dynamic *handle* height 1)))
                (compose layout))
-          (%nk:group-scrolled-end *handle*))))))
+          (%nuklear:group-scrolled-end *handle*))))))

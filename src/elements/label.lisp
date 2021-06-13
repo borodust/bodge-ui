@@ -18,6 +18,6 @@
     (let ((text (if (functionp text)
                     (format nil "~A" (funcall text))
                     text)))
-      (%nk:label *handle*
+      (%nuklear:label *handle*
                  (or text "")
                  (cffi:foreign-enum-value '%nuklear:text-alignment align)))))
